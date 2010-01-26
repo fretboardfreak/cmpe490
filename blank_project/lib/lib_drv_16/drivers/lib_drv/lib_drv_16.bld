@@ -1,0 +1,20 @@
+#!build
+default:
+	library
+	:language=c
+	:elxr_map_option=map
+	:elxr_map_option=crossreference
+	:arm_option=thumb_code
+	:arm_option=thumb_lib
+	:nolibraries=true
+	:auto_mvc=false
+	:xfputype=none
+	:arm_cputype=arm7tm
+#	:startfile_dir=-
+#	:startfiles=-
+	:sourcedirs=.
+	:assembler.args=-armuk
+lib_drv_16_optm_none.bld
+	library
+lib_drv_16_optm_full.bld
+	library

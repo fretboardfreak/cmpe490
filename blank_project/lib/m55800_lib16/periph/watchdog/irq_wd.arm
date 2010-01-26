@@ -1,0 +1,57 @@
+;------------------------------------------------------------------------------
+;-         ATMEL Microcontroller Software Support  -  ROUSSET  -
+;------------------------------------------------------------------------------
+; The software is delivered "AS IS" without warranty or condition of any
+; kind, either express, implied or statutory. This includes without
+; limitation any warranty or condition with respect to merchantability or
+; fitness for any particular purpose, or against the infringements of
+; intellectual property rights of others.
+;------------------------------------------------------------------------------
+;- File source          : irq_wd.s
+;- Object               : Assembler Watch Dog Interrupt Handler.
+;-
+;- 1.0 01/04/00 JCZ     : Creation
+;- 1.1 02/11/00 JPP     : Green Hills
+;------------------------------------------------------------------------------
+
+            AREA        AT91Lib, CODE, READONLY, INTERWORK
+
+            INCLUDE     periph/aic/irq.mac
+            INCLUDE     periph/watchdog/wd.inc
+
+            IMPORT      SaveWDHandler
+            IMPORT      WD_BASE
+
+PtWDBase
+            DCD         WD_BASE
+
+;------------------------------------------------------------------------------
+;- Function             : at91_watch_dog_interrupt_handler
+;- Treatments           : Watch Dog Interrupt Handler.
+;- Input Parameters     : r14 = lr = interrupt instruction address + 4
+;-                      : SPSR = CPSR when core interrupted
+;- Output Parameters    : None
+;- Registers lost       : None
+;- Called Functions     : The interrupt handler saved in <SaveWDHandler>.
+;- Called Macros        : IRQ_ENTRY, IRQ_EXIT
+;------------------------------------------------------------------------------
+            EXPORT      at91_watch_dog_interrupt_handler
+
+at91_watch_dog_interrupt_handler
+
+;-  Manage interrupt entry
+            IRQ_ENTRY
+
+;- Load the Watch Dog Base Address
+            ldr         r0, PtWDBase
+
+;- Branch on C Watch Dog Handler
+            ldr         r1, =SaveWDHandler
+            ldr         r1, [r1]
+            mov         r14, pc
+            bx          r1
+
+;-  Manage interrupt exit
+            IRQ_EXIT
+
+            END

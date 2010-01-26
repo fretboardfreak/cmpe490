@@ -1,0 +1,30 @@
+;------------------------------------------------------------------------------
+;-         ATMEL Microcontroller Software Support  -  ROUSSET  -
+;------------------------------------------------------------------------------
+; The software is delivered "AS IS" without warranty or condition of any
+; kind, either express, implied or statutory. This includes without
+; limitation any warranty or condition with respect to merchantability or
+; fitness for any particular purpose, or against the infringements of
+; intellectual property rights of others.
+;------------------------------------------------------------------------------
+;- File source          : wait_irq.mac
+;- Object               : Assembler Wait Interrupt Handler Macro
+;-
+;- 1.0 00/00/00 JCZ     : Creation
+;- 2.0 02/11/00  EL     : Include files path modification
+;------------------------------------------------------------------------------
+
+            AREA        reset, CODE, READONLY, INTERWORK
+
+            INCLUDE     periph/aic/aic.inc
+            INCLUDE     drivers/wait/wait_irq.mac
+           
+;------------------------------------------------------------------------------
+;- Function         : wait_irq
+;- Treatments       : Wait Interrupt Handler
+;- Operations       :
+;------------------------------------------------------------------------------
+
+            wait_irq_asm_handler    wait_desc, wake_up_handler
+
+            END

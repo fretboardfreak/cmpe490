@@ -1,0 +1,27 @@
+// MULTI Server Script
+// Setup script for the Atmel AT91 board
+
+// Reset the target to clear any interrupt-handling left over from
+// other programs.  This is not fool-proof, as user code running
+// immediately after reset could add handlers itself.
+target tr r
+target sleep 1
+target th
+
+// Disable all interrupts by writing all-ones to interrupt-diable
+// register (to protect against user-code that enable interrupts
+// post-reset, pre-halt; see note above)
+target m 0xfffff124=0xffffffff
+
+// This next mem write may not be required:
+// EBI_CSR0
+target m 0xffe00000=0x01002535
+
+// EBI_CSR1
+target m 0xffe00004=0x02002121
+// REMAP Done
+target m 0xffe00020=0x00000001
+//2M bytes per CS
+target m 0xffe00024=0x00000006
+target reg cpsr 0xd3
+

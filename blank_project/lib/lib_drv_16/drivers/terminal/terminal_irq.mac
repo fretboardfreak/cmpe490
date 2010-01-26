@@ -1,0 +1,35 @@
+;------------------------------------------------------------------------------
+;-      ATMEL Microcontroller Software Support  -   ROUSSET -
+;------------------------------------------------------------------------------
+;- File source          : terminal_irq.mac
+;- Librarian            : Not applicable
+;-
+;- Treatment            : Terminal Interrupt Handler Definition Macro.
+;-
+;- 1.0 JCZ 01/01/99     : Creation
+;- 1.1 02/11/00 JPP     : Green Hills
+;------------------------------------------------------------------------------
+
+                AREA    AT91Lib, CODE, READONLY, INTERWORK
+
+                INCLUDE     periph/aic/irq.mac
+
+                MACRO
+                AT91_TERMINAL_ASM_HANDLER   $handler_name, $terminal_desc
+
+                IMPORT      at91_terminal_c_handler
+                IMPORT      $terminal_desc
+                EXPORT      $handler_name
+$handler_name
+                IRQ_ENTRY
+
+                ldr     r1, =at91_terminal_c_handler
+                ldr     r0, =$terminal_desc
+                mov     r14, pc
+                bx      r1
+
+                IRQ_EXIT
+
+                MEND
+
+                END
