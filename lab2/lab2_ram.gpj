@@ -1,0 +1,7 @@
+#!gbuild
+[Program]
+	-DSEMIHOSTING
+	-DRAM
+src/cmpe490/wait_irq.arm
+src/user/main.c
+link/ram.ld

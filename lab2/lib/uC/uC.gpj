@@ -1,0 +1,27 @@
+#!gbuild
+[Library]
+	-Onone
+	--no_coverage_analysis
+	-DAT91M55800
+	-G
+	-o uC.a
+	-pnone
+	-cpu=arm7tm
+	-assembler.args=-armuk
+	--no_remarks
+	-thumb
+	-thumb_lib
+src\bsp.c
+src\os_tmr.c
+src\os_cpu_a.asm
+src\os_cpu_c.c
+src\ucos_ii.c
+src\os_core.c
+src\os_flag.c
+src\os_mbox.c
+src\os_mem.c
+src\os_mutex.c
+src\os_q.c
+src\os_sem.c
+src\os_task.c
+src\os_time.c

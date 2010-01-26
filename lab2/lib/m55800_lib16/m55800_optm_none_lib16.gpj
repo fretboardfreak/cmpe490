@@ -1,0 +1,33 @@
+#!gbuild
+[Library]
+	-Onone
+	--no_coverage_analysis
+	-DAT91M55800
+	-G
+	-o m55800_lib16.a
+	-pnone
+	-thumb
+	-thumb_lib
+	-cpu=arm7tm
+	-assembler.args=-armuk
+	--no_remarks
+periph\aic\lib_aic.c
+periph\aic\ext_irq\lib_ext_irq.c
+periph\pio\lib_pio.c
+periph\special_function\lib_sf.c
+periph\stdc\lib_err.c
+periph\timer_counter\lib_tc.c
+periph\usart\lib_usart.c
+periph\watchdog\lib_wd.c
+periph\watchdog\irq_wd.arm
+periph\aic\irq_end.arm
+periph\aic\irq_spu.arm
+periph\pio\pio_irq\irq_piob.arm
+periph\pio\pio_irq\irq_pioa.arm
+periph\power_saving\lib_apmc55800.c
+parts\m55800\lib_m55800.c
+periph\timer_counter\lib_tc_micro.c
+periph\rtc\lib_rtc.c
+periph\adc\lib_adc.c
+periph\dac\lib_dac.c
+periph\spi\lib_spi.c

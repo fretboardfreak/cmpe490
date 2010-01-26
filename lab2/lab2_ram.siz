@@ -1,0 +1,8 @@
+lab2_ram         .text        12936
+lab2_ram         .syscall         8
+lab2_ram         .interfunc       4
+lab2_ram         .fixaddr        32
+lab2_ram         .fixtype         8
+lab2_ram         .rodata        508
+lab2_ram         .secinfo        24
+lab2_ram         .data          236

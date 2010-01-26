@@ -1,0 +1,377 @@
+
+###+STARTUP: hidestars
+#+STARTUP: overview
+#+PRIORITIES: A E C
+This file is owned and maintained by Curtis Sand.  All Rights Reserved.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* Lab 2
+  - interfacing memory
+  - only use the power supplies for powering peripherals
+    - the arm7 board has a resettable fuse that will blow if you draw
+      current through the board.
+  - arm7 board is little endian so the number 123 is written as 321
+  - ~30ns wait state
+
+* Proposal Notes
+** Title Page
+   Curtis Sand, curtissand@gmail.com
+   Zach Byrne, zbyrne@ualberta.ca
+   Monday, Tuesday, Wednesday lab sections
+** abstract:
+** Functional Requirements of Project and Options/Extensions
+   - Life Preserver Firing Turret
+     - automated aiming via horizontal and vertical stepper motors.
+     - Nerf gun standing in as the life preserver launcher
+       - solonoid as a firing pin
+     - target aquisition via 2 digital cameras, an infra-red beacon
+       and software triangulation.
+     - the hardware design component will be the h-bridges and decoder
+       for the digitial signals to the stepper motors
+   - options/extensions
+     - better infra-red cameras for actual human tracking
+     - motion tracking for the target
+     - an actual life preserver launcher w/winch for retrieving the
+       target
+     - button control
+     - multiple target prioritizing
+   
+** design and description of operation:
+   - to be designed in modular/additive steps
+     - use buttons to target and fire the launcher (sans camera)
+     - use one camera to do the horizontal targeting, and buttons for
+       vertical targeting and firing.
+     - two cameras to triangulate distance of target and calculate the
+       required angle of the launcher
+   - microcontroller will send a digital signal (describe) to our
+     hardware which will decode it into signals for the stepper motor
+   - firing signal will be a separate line from the microcontroller to
+     our hardware which will drive the solonoid 
+   - the camera's will be (unless we determine otherwise) attached to
+     the microcontroller
+   - mostly C code:
+     - on a button press take the current snapshot from the camera's
+       and do all calculations from that one time frame (assumption is
+       that the target is stationary)
+     - software will determine the location of the infra-red beacon in
+       each of the images, then use a triangulation algorithm to
+       calculate the distance of the target
+       - from the distance and x position of the target we can
+         calculate the required trajectory
+       - This requires binocular range finding and a ballistic model
+         for the launcher
+     - once the required trajectory is known signals will be sent to
+       the turret to aim and fire
+** hardware requirements
+   - arm board (need model number) atmel 
+   - 2 servo's 
+   - 2 digital cameras
+   - 1 solonoid/or a servo motor
+   - digital decoder circuit for driving the stepper motors
+   - relay for the solonoid
+   - 
+** proposed parts order list, supplier cost
+   - 2 digital cameras: SEN-09334 JPEG Color Camera with a UART
+     Interface
+     - from sparkfun 
+     - datasheet:
+       http://www.sparkfun.com/datasheets/Sensors/Imaging/C328.pdf
+     - manual:
+       http://www.sparkfun.com/datasheets/Sensors/Imaging/C328_UM.pdf
+     - requires some parts (from digikey) for making connections:
+       - WM-8289-ND -- 2mm connection Recepticle housing (4 position female)
+         http://parts.digikey.com/1/parts/1210042-conn-rcpt-hsng-2mm-4pos-single-51090-0400.html
+       - WM-6050-ND -- crimps, female 24-30AWG, 2mm
+         http://parts.digikey.com/1/parts/271044-conn-term-female-24-30awg-tin-50212-8100.html
+   - 2 servos
+     - After talking to Nancy Minderman the recommended servos are
+       either HS422HB or HS635HB by Hitec.  These servos are in stock
+       at the school.
+       - Hitec HS422:
+         datasheet: http://www.robotshop.ca/PDF/hs422.pdf
+         User Manual: http://www.robotshop.ca/PDF/Servomanual.pdf
+       - Hitec HS635HB: 
+         datasheet: http://www.hitecrcd.com/product_file/file/56/HS635.pdf
+         User Manual: http://www.hitecrcd.com/product_file/file/55/Servomanual.pdf
+   - 1 solonoid or servo mechanism for pulling the trigger on the nerf
+     gun.
+     - 
+** table of all user IO signals
+   - first step (manual targeting and firing)
+     - of the four switches we'll use 2 for increase/decrease, one to
+       switch between horizontal/vertical contral and a button to fire
+       the solonoid
+   - second step (automated horizontal targeting, manual vertical
+     targetting and firing)
+     - increase/decrease buttons for vertical angle and one for firing
+     - one button to start the horizontal automated targetting
+   - third step (automated hor/vert targetting
+     - one button will start the targetting process
+     - one button will fire the launcher when targetting is finished
+   - signal between the digital decoder and the two stepper motors
+   - signal to the firing solonoid
+   - signal from the two digital cameras
+** schedule
+   - fabricate a turret platform with two axis of motion that can hold
+     the nerf gun mechanism and the firing solonoid
+   - fabricate a hardware decoder and h-bridge circuits to drive the
+     stepper motors on the turret platform
+   - fabricate a mount system to hold the two cameras with a parrallel
+     point of view
+   - code modules
+     - firing subroutine 
+       - send a signal to the firing solonoid
+     - targetting subroutine(s)
+       - create a digital signal to send to our hardware to drive the
+         stepper motors
+     - point finding subroutine 
+       - given image data from a single camera find the point where
+         the infra-red beacon is -- this needs to be better defined
+         once the behaviour of the camera with infra-red light is
+         determined.
+     - range finding subroutine 
+       - given point data from the point finding subroutine for both
+         of the cameras determine the distance of the beacon
+     - ballistic model calculator 
+       - given the distance to the target and the x-position this will
+         calculate the required trajectory of the turret and call the
+         targetting subroutine(s)
+
+
+   
+
+* Proposal
+** Title Page
+   Curtis Sand, curtissand@gmail.com
+   Zach Byrne, zbyrne@ualberta.ca
+   Preferred lab sections: Monday, Tuesday, Wednesday lab sections
+** abstract:
+** Functional Requirements and Optional Extensions
+   For the Automated Life Preserver Launcher to be considered a %100
+   successfull project we would expect the following functionality: A
+   button is pressed to alert the machine of an overboard crew member
+   and the system automatically aquires the infra-red target, aims and
+   accurately fires a life saving flotation device at the location of
+   the crew member.  Due to scope issues and availability of
+   mechanical parts, we will be making a few simplifications and two
+   very important assumptions to make a proof-of-concept prototype of
+   this system attainable.
+
+   The first of the two assumptions that will be made is that the
+   target is stationary.  Motion tracking, and compensation for motion
+   in targetting would be a requirement if this were to be mounted on
+   a boat; however, we are attempting to show that a system that uses
+   an infra-red beacon as a target can calculate the distance of the
+   target, determine an appropriate ballistic trajectory and fire a
+   projectile with reasonable accuracy.  The second assumption that we
+   will make is that the infra-red beacon that we will use is the
+   brightest infra-red source within the view of the camera.
+
+   Some simplifications in the setup that we will use include using a
+   toy nerf gun to stand in for a life preserver launcher, an LED to
+   stand in for a human infra-red sorce, and that targetting time is
+   not an issue.  We would like to show that it is possible to use
+   pictures from two parallel facing cameras to calculate the distance
+   of an object and to subsequently calculate the appropriate
+   trajectory for a projectile to hit the target.
+
+   One thing that we are not very sure about yet is whether or not an
+   infra-red LED will be an easily identified object in the output of
+   our cameras.  A backup plan that we have considered for this
+   possibility is that we can use a bright LED in the visible light
+   spectrum in a dark room to cause our target to stand out in the
+   picture.
+
+   Another problem that we have also considered is the amount of work
+   that may be required to interface the microcontroller with the two
+   cameras.  This work may impede integration of other parts of our
+   project.  As a preventitive measure we have split the project up
+   into essentially three functional sections (see the Design and
+   Description of Operation section for more information.).  In this
+   way the two of us can develop each section in parallel and show
+   working functionality in each section separately if need be.
+
+   Additions and extensions that could be added to this are many.  Due
+   to the use of infra-red light for targeting this type of system
+   could be used to fight fires, or track vehicles with a video
+   camera.  An obvious next step from using an infra-red beacon and
+   and standard digital camera would be to use an infra-red camera and
+   image detection to recognize a human.  As mentioned earlier, motion
+   tracking would be a logical next step for a system such as this.
+   Another extension that could be added would be an actual life
+   preserver launcher with a cable and a winch for retrieving the
+   target and multiple target recognition and prioritization so that a
+   multiple man-overboard situation could be dealt with.
+
+** Design and Description of Operation
+   The Automated Life Preserver Launcher (ALPL) will be broken down into
+   three functional modules or sections.  The first section is the
+   interface between the two cameras and the microcontroller.  The
+   goal of this section is to successfully aquire a single frame from
+   each camera and store it temporarily in RAM on the microcontroller.
+   The second section is a software section that will analyze the two
+   images from the cameras and identify the infra-red target,
+   calculate the distance to the target and then, based on the
+   location of the target, calculate the appropriate angle to aim the
+   turret.  The third section will be the turret section which will
+   take a digital signal, decode the signal and then adjust the turret
+   to the appropriate trajectory.
+
+   The ALPL System will use the Atmel AT91EB55 microcontroller as its
+   brains.  Connected to two of the UARTs on the Atmel microcontroller
+   will be a SEN-09334 JPEG Color Camera.  Finally connected to the IO
+   bus of the Atmel microcontroller will be a custom built circuit
+   that will decode a digital signal and drive the servos in the
+   turret to adjust the trajectory of the turret and fire the
+   projectile.  See the Hardware Requirements and Proposed Parts Order
+   List sections for more information on these parts.
+
+   [Insert block diagram here]
+
+   In order for the system to accurately calculate the distance of the
+   target, the two cameras will need to be securely mounted so that
+   they face in parallel directions.  In this way the difference in
+   the location of the target in the images from the two cameras can
+   be used to calculate both the horizontal position and the distance
+   of the target.
+
+   After we have aquired a suitable nerf gun to stand in for the Life
+   Preserver Launcher we will need to do a series of experiments to
+   determine a ballistic model that can be used to translate the
+   distance to the target into the required angle that is needed to
+   hit the target.  A requirement of the mechanical turret is that its
+   range of motion be sufficient that the angle required to hit the
+   target for any distance between the range of the nerf gun and the
+   minimum range of the binocular camera system.
+
+   The software that is required to make this system can be broken
+   down into logical subroutines.  First we will need a targetting
+   subroutine.  Given a requested trajectory for the turret to face
+   the software will have to generate an encoded signal that will be
+   sent to our custom hardware to aim the turret.  Next we will need a
+   firing subroutine that will generate a signal that will cause the
+   turret to fire the projectile.  The cameras will need to talk to
+   some software that can properly request an image from each of the
+   cameras and save the images in RAM.  Once the images are saved into
+   memory another subroutine will need to analyze the images and
+   identify the location of the target.  The x and y positions of the
+   target in each image will then be passed into a range finding
+   subroutine that will use a binocular range finding algorithm to
+   estimate the distance between the infra-red beacon and the cameras.
+   Once the distance to the target is known it will be passed into
+   another subroutine that will calculate the required trajectory for
+   the projectile.  Finally this can be passed into the previously
+   mentioned targetting subroutine.  To make the target acquisition
+   easier we plan to manipulate the physical world to ensure that the
+   infra-red beacon stands out clearly in the resulting image from the
+   cameras.
+
+   The design of the turret is a simple two axis design so that there
+   will be both horizontal and vertical articulation.  The turret will
+   need to be strong enough to hold a small plastic nerf gun and a
+   firing mechanism.  To fire the nerf gun programatically we
+   originally thought of using a solonoid.  In looking at the
+   available parts sites we found that solonoids were very expensive
+   for such a simple operation.  As a backup plan we have determined
+   that we can use a servo in one of two configurations.  The first
+   configuration would have an arm attached at a ninety degree angle
+   to the drive shaft of the servo in such a way that when the servo
+   turns the arm is pressed against the trigger.  This setup however
+   may require more torque than the readily available servo's may be
+   able to proved so the second configuration addresses that.  In the
+   second configuration the servo is mounted behind the handle of the
+   nerf gun and would act as a winch which would pull a string around
+   the trigger of the nerf gun until the firing mechanism is
+   triggered.
+
+** Hardware Requirements
+   To construct the ALPL system we will need a microcontroller
+   (processor speed has been made irrelevant by our stationary target
+   assumption), three servos for the turret, 2 digital cameras and a
+   piece of custom hardware to decode a digital signal and drive the
+   servos on the turret.
+   
+   The microcontroller that we plan to use is the Atmel AT91EB55 board
+   that is available in the lab.  The cameras that we plan to use will
+   connect to the Atmel board via two of the available UARTs.  The
+   servos that drive the turret will be connected to a custom piece of
+   hardware.  The custom hardware will recieve a digital signal from
+   the microcontroller which it will decode into a choice of which
+   servo to move, what direction to move the servo, and how much to
+   move the servo.  
+
+   The camera model that we are planning to use can output a single
+   JPEG frame at a time at 640x480 resolution.  In the standard JPEG
+   encoding there are three bytes of information for each pixel which
+   boils down to approx. 900kb per image at maximum resolution.
+   Considering that the Atmel board has about 128Kb of space for user
+   code and thet we will also need space for a second image, we will
+   need to interface some ram with the microcontroller.  We will most
+   likely use the lowest resolution available on our cameras but this
+   gives an estimate to our space requirements.  As an educated guess,
+   we can say that we will need at maximum 2000Kb of RAM. 
+
+** Proposed Parts Order List
+   - 2 digital cameras: SEN-09334 JPEG Color Camera with a UART
+     Interface
+     - $54.95 from sparkfun.com
+     - datasheet:
+       http://www.sparkfun.com/datasheets/Sensors/Imaging/C328.pdf
+     - manual:
+       http://www.sparkfun.com/datasheets/Sensors/Imaging/C328_UM.pdf
+     - requires some parts (from digikey) for making connections:
+       - WM-8289-ND -- 2mm connection Recepticle housing (4 position female)
+         http://parts.digikey.com/1/parts/1210042-conn-rcpt-hsng-2mm-4pos-single-51090-0400.html
+         - $0.33 from digikey.com
+       - WM-6050-ND -- crimps, female 24-30AWG, 2mm
+         http://parts.digikey.com/1/parts/271044-conn-term-female-24-30awg-tin-50212-8100.html
+         - $3.54/10units from digikey.com
+   - 3 servos
+     - After talking to Nancy Minderman the recommended servos are
+       either HS422HB or HS635HB by Hitec.  These servos are in stock
+       at the school.
+       - Hitec HS422:
+         datasheet: http://www.robotshop.ca/PDF/hs422.pdf
+         User Manual: http://www.robotshop.ca/PDF/Servomanual.pdf
+       - Hitec HS635HB: 
+         datasheet: http://www.hitecrcd.com/product_file/file/56/HS635.pdf
+         User Manual: http://www.hitecrcd.com/product_file/file/55/Servomanual.pdf
+** Table of User IO Signals
+** Schedule
+   The following time estimates are based on the concept of a man
+   week.  With two people on the project and 7 weeks to work with we
+   have 14 man weeks in which to allocate time.  The following tasks
+   then leave 2 man weeks as a fudge factor.
+
+   - Fabricate a turret platform with two axis of motion that can hold
+     the nerf gun mechanism and the firing servo
+     - Approx. 0.5 Week
+     - Group Member: Unknown
+   - Fabricate a hardware decoder and circuits to drive the servo's on
+     the turret platform.
+     - Approx. 3 Weeks
+     - Group Member: Unknown
+   - Fabricate a mount system to hold the two cameras with a parallel
+     point of view.
+     - Approx. 0.5 Week
+     - Group Member: Unknown
+   - Interface the cameras with the microcontroller
+     - Approx. 2 weeks
+     - Group Member: Unknown
+   - Interface additional RAM with the microcontroller
+     - Approx. 1 week
+     - Group Member: Unknown
+   - Firing Subroutine:
+     - Approx. 1 week
+     - Group Member: Unknown
+   - Targetting Subroutine
+     - Approx. 1 week
+     - Group Member: Unknown
+   - Target Finding Subroutine
+     - Approx. 1 week
+     - Group Member: Unknown
+   - Range Finding Subroutine
+     - Approx. 1 week
+     - Group Member: Unknown
+   - Ballistic Model Subroutine
+     - Approx. 1 week
+     - Group Member: Unknown

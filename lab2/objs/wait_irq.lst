@@ -1,0 +1,84 @@
+                                                                      Page 1
+                                                              src/cmpe490/wait_irq.arm
+Command Line: C:\GHS\arm423\asarm.exe -elf -b0 -Iinclude -Ilib/m55800_lib16 -Ilib/lib_drv_16 -Ilib/uC -IC:\GHS\arm423\lib\arm4 -cpu=arm7tm -fpu=soft -dbo=H:\CMPE490\Lab2\objs\wait_irq.dbo -armuk --gh_oname=objs\wait_irq.o --gh_md=objs\wait_irq.d -o objs\wait_irq.o -list=objs\wait_irq.lst src/cmpe490/wait_irq.arm 
+Original File: src/cmpe490/wait_irq.arm
+Source File: src/cmpe490/wait_irq.arm
+Directory: H:\CMPE490\Lab2
+Host OS: GHS_WIN32
+Version: EASE 2.0 (c) 2001 Green Hills Software    Build: Feb 22 2006
+Release: MULTI v4.2.3                                                                      
+Revision Date: Fri Mar 24 03:14:01 2006
+
+Release Date: Fri Mar 31 01:02:10 2006
+
+                       1 ;------------------------------------------------------------------------------
+                       2 ;-         ATMEL Microcontroller Software Support  -  ROUSSET  -
+                       3 ;------------------------------------------------------------------------------
+                       4 ; The software is delivered "AS IS" without warranty or condition of any
+                       5 ; kind, either express, implied or statutory. This includes without
+                       6 ; limitation any warranty or condition with respect to merchantability or
+                       7 ; fitness for any particular purpose, or against the infringements of
+                       8 ; intellectual property rights of others.
+                       9 ;------------------------------------------------------------------------------
+                      10 ;- File source          : wait_irq.mac
+                      11 ;- Object               : Assembler Wait Interrupt Handler Macro
+                      12 ;-
+                      13 ;- 1.0 00/00/00 JCZ     : Creation
+                      14 ;- 2.0 02/11/00  EL     : Include files path modification
+                      15 ;------------------------------------------------------------------------------
+                      16 
+                      17             AREA        reset, CODE, READONLY, INTERWORK
+                      18 
+                      19             INCLUDE     periph/aic/aic.inc
+                      20             INCLUDE     drivers/wait/wait_irq.mac
+                      21            
+                      22 ;------------------------------------------------------------------------------
+                      23 ;- Function         : wait_irq
+                      24 ;- Treatments       : Wait Interrupt Handler
+                      25 ;- Operations       :
+                      26 ;------------------------------------------------------------------------------
+                      27 
+                      28             wait_irq_asm_handler    wait_desc, wake_up_handler
+                      28 <MACRO BEGIN>
+                      28 EXPORT wake_up_handler 
+                      28 IMPORT wait_desc 
+                      28 wake_up_handler 
+                      28 
+                      28 stmfd sp ! , { r0 } 
+                      28 
+                      28 
+                      28 
+                      28 
+                      28 ldr r0 , = AIC_BASE 
+                      28 str r0 , [ r0 , AIC_IVR ] 
+                      28 
+                      28 str r0 , [ r0 , AIC_EOICR ] 
+                      28 
+                      28 
+                      28 ldr r0 , = wait_desc 
+                      28 ldr r0 , [ r0 ] 
+                      28 ldr r0 , [ r0 ] 
+                      28 ldr r0 , [ r0 , TC_SR ] 
+                      28 
+                      28 
+
+                                                                      Page 2
+                                                              src/cmpe490/wait_irq.arm
+                      28 ldmia sp ! , { r0 } 
+                      28 
+                      28 
+                      28 subs pc , r14 , 4 
+00000000 e92d0001     28 <MACRO END>
+00000004 e3e00ef0 
+00000008 e22000ff 
+0000000c e5800100 
+00000010 e5800130 
+00000014 e51f0008*
+00000018 e5900000 
+0000001c e5900000 
+00000020 e5900020 
+00000024 e8bd0001 
+00000028 e25ef004 
+                      29 
+                      30             END
+0000002c 014a3e08*    31 
