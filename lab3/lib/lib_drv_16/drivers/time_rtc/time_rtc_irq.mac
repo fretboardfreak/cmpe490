@@ -1,0 +1,40 @@
+;------------------------------------------------------------------------------
+;-         ATMEL Microcontroller Software Support  -  ROUSSET  -
+;------------------------------------------------------------------------------
+; The software is delivered "AS IS" without warranty or condition of any
+; kind, either express, implied or statutory. This includes without
+; limitation any warranty or condition with respect to merchantability or
+; fitness for any particular purpose, or against the infringements of
+; intellectual property rights of others.
+;------------------------------------------------------------------------------
+;- File source          : time_rtc_irq.mac
+;- Object               : Assembler RTC Interrupt Handler Definition Macro.
+;-
+;- 1.0 11/09/00 JPP     : Creation
+;- 1.1 02/11/00 JPP     : Green Hills
+;------------------------------------------------------------------------------
+
+                AREA        AT91Lib, CODE, READONLY, INTERWORK
+
+                INCLUDE     periph/aic/irq.mac
+
+                MACRO
+                AT91_RTC_ASM_HANDLER    $handler_name, $rtc
+
+                IMPORT      at91_time_rtc_c_handler
+                IMPORT      $rtc
+                EXPORT      $handler_name
+$handler_name
+
+                IRQ_ENTRY
+
+                ldr     r1, =at91_time_rtc_c_handler
+                ldr     r0, =$rtc
+                mov     r14, pc
+                bx      r1
+
+                IRQ_EXIT
+
+                MEND
+
+                END

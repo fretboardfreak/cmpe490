@@ -1,0 +1,33 @@
+#!gbuild
+[Library]
+	-Onone
+	--no_coverage_analysis
+	-DAT91M55800
+	-G
+	-o lib_drv_16.a
+	-pnone
+	-cpu=arm7tm
+	-assembler.args=-armuk
+	--no_remarks
+	-thumb
+	-thumb_lib
+drivers\analog\analog_timer.c
+drivers\analog\analog_adc_irq.c
+drivers\analog\analog_dac.c
+drivers\analog\analog_adc.c
+drivers\capture\capture.c
+drivers\chrono\chrono.c
+drivers\com\com_tools.c
+drivers\com\com_baud.c
+drivers\com\com.c
+drivers\lib_i2c\lib_i2c.c
+drivers\serial_periph_1\serial_periph_1.c
+drivers\terminal\terminal.c
+drivers\time_rtc\time_rtc_tools.c
+drivers\time_rtc\time_rtc_irq.c
+drivers\time_rtc\time_rtc.c
+drivers\wait\wait.c
+drivers\flash\lib_flash_at49.c
+drivers\flash\flash_atxx_write.c
+drivers\flash\lib_flash_at29.c
+drivers\flash\flash_at49_data.c

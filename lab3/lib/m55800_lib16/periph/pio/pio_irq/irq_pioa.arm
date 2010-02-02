@@ -1,0 +1,45 @@
+;------------------------------------------------------------------------------
+;-         ATMEL Microcontroller Software Support  -  ROUSSET  -
+;------------------------------------------------------------------------------
+; The software is delivered "AS IS" without warranty or condition of any
+; kind, either express, implied or statutory. This includes without
+; limitation any warranty or condition with respect to merchantability or
+; fitness for any particular purpose, or against the infringements of
+; intellectual property rights of others.
+;------------------------------------------------------------------------------
+;- File source          : irq_pioa.s
+;- Object               : Assembler PIO Controller A Interrupt Handler.
+;-
+;- 1.0 00/00/00 JCZ     : Creation
+;- 1.1 02/11/00 JPP     : Green Hills
+;------------------------------------------------------------------------------
+
+            AREA        IrqPioA, CODE, READONLY, INTERWORK
+
+            INCLUDE     periph/aic/irq.mac
+            INCLUDE     periph/pio/pio.inc
+
+            IMPORT      pioa_c_irq_handler
+
+;------------------------------------------------------------------------------
+;- Function             : pioa_interrupt_handler
+;- Treatments           : Parallel IO Controller Interrupt Handler.
+;- Called Functions     : pioa_irq_handler
+;- Called Macros        : IRQ_ENTRY, IRQ_EXIT
+;------------------------------------------------------------------------------
+            EXPORT      pioa_asm_irq_handler
+
+pioa_asm_irq_handler
+
+;- Manage Exception Entry
+            IRQ_ENTRY
+
+;- Call the PIOA Interrupt C handler 
+            ldr         r0, =pioa_c_irq_handler
+            mov         r14, pc
+            bx          r0
+            
+;- Manage Exception Exit
+            IRQ_EXIT
+            
+            END

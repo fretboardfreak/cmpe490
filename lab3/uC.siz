@@ -1,0 +1,13 @@
+uC.a(os_time.o)  .text          496
+uC.a(os_task.o)  .text         2268
+uC.a(os_sem.o)   .text          862
+uC.a(os_q.o)     .text         1472
+uC.a(os_mutex.o)  .text         2068
+uC.a(os_mem.o)    .text          532
+uC.a(os_mbox.o)   .text          950
+uC.a(os_flag.o)   .text         2336
+uC.a(os_core.o)   .text         3012
+uC.a(os_core.o)   .rodata        288
+uC.a(os_cpu_c.o)  .text          248
+uC.a(os_cpu_a.o)  .text          556
+uC.a(bsp.o)       .text          628

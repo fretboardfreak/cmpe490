@@ -1,0 +1,9 @@
+#!gbuild
+[Program]
+	-DSEMIHOSTING
+	-DRAM
+include\cmpe490\lcd.h
+src\cmpe490\lab3.c
+src\cmpe490\lcd.c
+src\cmpe490\wait_irq.arm
+link/ram.ld

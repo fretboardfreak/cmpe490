@@ -1,0 +1,61 @@
+;------------------------------------------------------------------------------
+;-         ATMEL Microcontroller Software Support  -  ROUSSET  -
+;------------------------------------------------------------------------------
+; The software is delivered "AS IS" without warranty or condition of any
+; kind, either express, implied or statutory. This includes without
+; limitation any warranty or condition with respect to merchantability or
+; fitness for any particular purpose, or against the infringements of
+; intellectual property rights of others.
+;------------------------------------------------------------------------------
+;- File source          : wait_irq.mac
+;- Object               : Assembler Wait Interrupt Handler Macro
+;-
+;- 1.0 01/04/00 JCZ     : Creation
+;- 1.1 02/11/00 JPP     : Green Hills
+;------------------------------------------------------------------------------
+
+            AREA        wait_irq, CODE, READONLY, INTERWORK
+
+            INCLUDE     periph/timer_counter/tc.inc
+           
+;------------------------------------------------------------------------------
+;- Function         : wait_irq
+;- Treatments       : Wait Interrupt Handler
+;- Operations       :
+;-      - Write the IVR ( Protect Mode support )
+;-      - Write the End of Interrupt Command Register
+;-      - Read the TC Status Register to remove the wake-up interrupt 
+;-      - Return
+;------------------------------------------------------------------------------
+            MACRO   
+            wait_irq_asm_handler    $WaitDesc, $IrqHandler
+
+            EXPORT  $IrqHandler
+            IMPORT  $WaitDesc
+$IrqHandler
+;- Adjust and save LR_irq in IRQ stack
+            stmfd       sp!, {r0}
+
+;- Write in the IVR to support Protect Mode
+;- No effect in Normal Mode
+;- De-assert the NIRQ and clear the source in Protect Mode
+            ldr         r0, =AIC_BASE
+            str         r0, [r0, #AIC_IVR]
+;- Mark the End of Interrupt on the AIC
+            str         r0, [r0, #AIC_EOICR]
+
+;- Read the Status Register of the used Timer Counter
+            ldr         r0, =$WaitDesc
+            ldr         r0, [r0]        ; get the Timer Counter Descriptor Address
+            ldr         r0, [r0]        ; get the Timer Counter Channel Base Address
+            ldr         r0, [r0, #TC_SR]
+            
+;- Adjust and save LR_irq in IRQ stack
+            ldmia       sp!, {r0}
+
+;- Adjust LR_irq and return 
+            subs        pc, r14, #4
+
+            MEND
+
+            END
