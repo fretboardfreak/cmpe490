@@ -1,0 +1,33 @@
+;------------------------------------------------------------------------------
+;-      ATMEL Microcontroller Software Support  -   ROUSSET -
+;------------------------------------------------------------------------------
+;- File source          : serial_periph_1_irq.mac
+;- Object               : Serial Peripheral Driver Interrupt Handler Macro.
+;-
+;- 1.0 JCZ 04/01/00     : Creation
+;- 1.1 02/11/00 JPP     : Green Hills
+;------------------------------------------------------------------------------
+
+                AREA        AT91Lib, CODE, READONLY, INTERWORK
+
+                INCLUDE     periph/aic/irq.mac
+
+                MACRO   
+                SERIAL_PERIPH_1_ASM_HANDLER   $asm_handler, $c_handler, $descriptor
+
+                IMPORT      $c_handler
+                IMPORT      $descriptor
+                EXPORT      $asm_handler
+$asm_handler
+                IRQ_ENTRY
+
+                ldr     r1, =$c_handler
+                ldr     r0, =$descriptor
+                mov     r14, pc
+                bx      r1
+
+                IRQ_EXIT
+
+                MEND
+
+                END

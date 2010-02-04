@@ -1,0 +1,69 @@
+;------------------------------------------------------------------------------
+;-         ATMEL Microcontroller Software Support  -  ROUSSET  -
+;------------------------------------------------------------------------------
+; The software is delivered "AS IS" without warranty or condition of any
+; kind, either express, implied or statutory. This includes without
+; limitation any warranty or condition with respect to merchantability or
+; fitness for any particular purpose, or against the infringements of
+; intellectual property rights of others.
+;------------------------------------------------------------------------------
+;- File source          : adc_irq.mac
+;- Object               : Assembler ADC, Timer Interrupt Handler Definition
+;-                        Macro.
+;-
+;- 1.0 11/09/00 JPP     : Creation
+;- 1.1 02/11/00 JPP     : Green Hills
+;------------------------------------------------------------------------------
+
+                AREA        AT91Lib, CODE, READONLY, INTERWORK
+
+                INCLUDE     periph/aic/irq.mac
+;------------------------------------------------------------------------------
+;- Macro            : AT91_ANALOG_ADC_ASM_HANDLER
+;- Treatments       : Set the assembly Irq Handle for AIC
+;- Operations       : Call the correspoding C func6tion
+;------------------------------------------------------------------------------
+                MACRO
+                AT91_ANALOG_ADC_ASM_HANDLER   $c_handler_name, $First_param_function,$handler_name
+
+                IMPORT      $c_handler_name
+                IMPORT      $First_param_function
+                EXPORT      $handler_name
+$handler_name
+
+                IRQ_ENTRY
+
+                ldr     r1, =$c_handler_name             ;- C function Handler
+                ldr     r0, =$First_param_function       ;- function param
+                mov     r14, pc
+                bx      r1                               ;- Call in Interworking
+
+                IRQ_EXIT
+
+                MEND
+
+;------------------------------------------------------------------------------
+;- Macro            : AT91_TIMER_ASM_HANDLER
+;- Treatments       : Set the assembly Irq Handle for AIC
+;- Operations       : Call the correspoding C func6tion
+;------------------------------------------------------------------------------
+                MACRO
+                AT91_TIMER_ASM_HANDLER   $c_handler_name, $First_param_function, $handler_name
+
+                IMPORT      $c_handler_name
+                IMPORT      $First_param_function
+                EXPORT      $handler_name
+$handler_name
+
+                IRQ_ENTRY
+
+                ldr     r1, =$c_handler_name                ;- C function Handler
+                ldr     r0, =$First_param_function          ;- function param
+                mov     r14, pc
+                bx      r1                                  ;- Call in Interworking
+
+                IRQ_EXIT
+
+                MEND
+
+                END

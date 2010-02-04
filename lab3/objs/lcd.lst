@@ -1,0 +1,340 @@
+                                                                      Page 1
+                                                              C:\DOCUME~1\csand\LOCALS~1\Temp\gh_581.s
+Command Line: C:\GHS\arm423\asarm.exe -elf -b0 -Iinclude -Ilib/m55800_lib16 -Ilib/lib_drv_16 -Ilib/uC -IC:\GHS\arm423\lib\arm4 -cpu=arm7tm -fpu=soft -source=lcd.c -o objs\gh_581.o -list=objs\lcd.lst C:\DOCUME~1\csand\LOCALS~1\Temp\gh_581.s 
+Original File: C:\DOCUME~1\csand\LOCALS~1\Temp\gh_581.s
+Source File: lcd.c
+Directory: H:\Documents\cmpe490\lab3
+Host OS: GHS_WIN32
+Version: EASE 2.0 (c) 2001 Green Hills Software    Build: Feb 22 2006
+Release: MULTI v4.2.3                                                                      
+Revision Date: Fri Mar 24 03:14:01 2006
+
+Release Date: Fri Mar 31 01:02:10 2006
+
+                       1 ;Driver Command: ccarm -c -MD -Iinclude -Ilib/m55800_lib16 -Ilib/lib_drv_16
+                       2 ;		-Ilib/uC -bsp at91eb55 -G -object_dir=objs -arm_uk_asm -list
+                       3 ;		-keepmap -Mx -gsize -DSEMIHOSTING -DRAM -filetype.c
+                       4 ;		src\cmpe490\lcd.c -o objs\lcd.o
+                       5 ;Source File:   src\cmpe490\lcd.c
+                       6 ;Directory:     H:\Documents\cmpe490\lab3
+                       7 ;Compile Date:  Tue Feb 02 17:10:12 2010
+                       8 ;Host OS:       Win32
+                       9 ;Version:       C-ARM 4.2.1 RELEASE VERSION
+                      10 ;Release:       MULTI v4.2.3
+                      11 ;Revision Date: Tue Mar 28 20:25:47 2006
+                      12 ;Release Date:  Fri Mar 31 01:02:14 2006
+                      13 	.text
+                      14 ..bof.H.3A.5CDocuments.5Ccmpe490.5Clab3.5Cobjs.5Clcd...48.3A.5CDocuments.5Ccmpe490.5Clab3..4B68BEE6..0::
+                      15 	.align	4
+                      16 LCDInit::
+00000000 e92d4310     17 	stmfd	[sp]!,{r4,r8-r9,lr}
+                      18 .LDW01:
+00000004 e3a04000     19 	mov	r4,0
+00000008 e59f1254*    20 	ldr	r1,.L26
+0000000c e59f0254*    21 	ldr	r0,.L27
+00000010 e3a02001     22 	mov	r2,1
+00000014 eb000000*    23 	bl	at91_pio_open
+00000018 e59f0248*    24 	ldr	r0,.L27
+0000001c e3a02001     25 	mov	r2,1
+00000020 e3a01a80     26 	mov	r1,1<<19
+00000024 eb000000*    27 	bl	at91_pio_write
+00000028 e3841020     28 	orr	r1,r4,32
+0000002c e20140ff     29 	and	r4,r1,255
+00000030 e3841010     30 	orr	r1,r4,16
+00000034 e20140ff     31 	and	r4,r1,255
+00000038 e3841008     32 	orr	r1,r4,8
+0000003c e20140ff     33 	and	r4,r1,255
+00000040 e3841004     34 	orr	r1,r4,4
+00000044 e20140ff     35 	and	r4,r1,255
+00000048 e1a00004     36 	mov	r0,r4
+0000004c eb000041*    37 	bl	LCDCmd
+00000050 e3a04000     38 	mov	r4,0
+00000054 e3841008     39 	orr	r1,r4,8
+00000058 e20140ff     40 	and	r4,r1,255
+0000005c e3841004     41 	orr	r1,r4,4
+00000060 e20140ff     42 	and	r4,r1,255
+00000064 e3841002     43 	orr	r1,r4,2
+00000068 e20140ff     44 	and	r4,r1,255
+0000006c e3841001     45 	orr	r1,r4,1
+00000070 e20140ff     46 	and	r4,r1,255
+00000074 e1a00004     47 	mov	r0,r4
+00000078 eb000036*    48 	bl	LCDCmd
+0000007c e3a04000     49 	mov	r4,0
+00000080 e3841010     50 	orr	r1,r4,16
+
+                                                                      Page 2
+                                                              C:\DOCUME~1\csand\LOCALS~1\Temp\gh_581.s
+00000084 e20140ff     51 	and	r4,r1,255
+00000088 e3841004     52 	orr	r1,r4,4
+0000008c e20140ff     53 	and	r4,r1,255
+00000090 e1a00004     54 	mov	r0,r4
+00000094 eb00002f*    55 	bl	LCDCmd
+00000098 e3a04000     56 	mov	r4,0
+0000009c e3841001     57 	orr	r1,r4,1
+000000a0 e20140ff     58 	and	r4,r1,255
+000000a4 e1a00004     59 	mov	r0,r4
+000000a8 eb00002a*    60 	bl	LCDCmd
+                      61 .LDW11:
+                      62 .LDW21:
+000000ac e8bd4310     63 	ldmfd	[sp]!,{r4,r8-r9,lr}
+000000b0 e12fff1e*    64 	ret	
+                      65 	.endf	LCDInit
+                      66 	.align	4
+                      67 .LDW31:
+                      68 ;command	r4	local
+                      69 
+                      70 	.data
+                      71 	.text
+                      72 	.align	4
+                      73 	.align	4
+                      74 ToggleEnableLine::
+000000b4 e92d4300     75 	stmfd	[sp]!,{r8-r9,lr}
+                      76 .LDW41:
+000000b8 e59f01a8*    77 	ldr	r0,.L27
+000000bc e3a02000     78 	mov	r2,0
+000000c0 e3a01a80     79 	mov	r1,1<<19
+000000c4 eb000000*    80 	bl	at91_pio_write
+000000c8 e3a01ffa     81 	mov	r1,0x03e8
+000000cc e59f8198*    82 	ldr	r8,.L42
+000000d0 e5881008     83 	str	r1,[r8,8]
+000000d4 e59f0190*    84 	ldr	r0,.L42
+000000d8 eb000000*    85 	bl	at91_wait_open
+000000dc e59f0184*    86 	ldr	r0,.L27
+000000e0 e3a02001     87 	mov	r2,1
+000000e4 e3a01a80     88 	mov	r1,1<<19
+000000e8 eb000000*    89 	bl	at91_pio_write
+000000ec e3a01ffa     90 	mov	r1,0x03e8
+000000f0 e59f8174*    91 	ldr	r8,.L42
+000000f4 e5881008     92 	str	r1,[r8,8]
+000000f8 e59f016c*    93 	ldr	r0,.L42
+000000fc eb000000*    94 	bl	at91_wait_open
+                      95 .LDW51:
+                      96 .LDW61:
+00000100 e8bd4300     97 	ldmfd	[sp]!,{r8-r9,lr}
+00000104 e12fff1e*    98 	ret	
+                      99 	.endf	ToggleEnableLine
+                     100 	.align	4
+                     101 .LDW71:
+                     102 
+                     103 	.data
+                     104 	.text
+                     105 	.align	4
+                     106 	.align	4
+                     107 LCDData::
+00000108 e92d4300    108 	stmfd	[sp]!,{r8-r9,lr}
+0000010c e1a01000    109 	mov	r1,r0
+                     110 .LDW81:
+00000110 e1a00001    111 	mov	r0,r1
+
+                                                                      Page 3
+                                                              C:\DOCUME~1\csand\LOCALS~1\Temp\gh_581.s
+00000114 eb00002b*   112 	bl	WriteDataLines
+00000118 e59f0148*   113 	ldr	r0,.L27
+0000011c e3a02000    114 	mov	r2,0
+00000120 e3a01980    115 	mov	r1,1<<21
+00000124 eb000000*   116 	bl	at91_pio_write
+00000128 e59f0138*   117 	ldr	r0,.L27
+0000012c e3a02001    118 	mov	r2,1
+00000130 e3a01940    119 	mov	r1,1<<20
+00000134 eb000000*   120 	bl	at91_pio_write
+00000138 ebffffdd*   121 	bl	ToggleEnableLine
+0000013c e3a01ffa    122 	mov	r1,0x03e8
+00000140 e59f8124*   123 	ldr	r8,.L42
+00000144 e5881008    124 	str	r1,[r8,8]
+00000148 e59f011c*   125 	ldr	r0,.L42
+0000014c eb000000*   126 	bl	at91_wait_open
+                     127 .LDW91:
+                     128 .LDW02:
+00000150 e8bd4300    129 	ldmfd	[sp]!,{r8-r9,lr}
+00000154 e12fff1e*   130 	ret	
+                     131 	.endf	LCDData
+                     132 	.align	4
+                     133 .LDW12:
+                     134 
+                     135 ;byte	r1	param
+                     136 
+                     137 	.data
+                     138 	.text
+                     139 	.align	4
+                     140 	.align	4
+                     141 LCDCmd::
+00000158 e92d4300    142 	stmfd	[sp]!,{r8-r9,lr}
+0000015c e1a01000    143 	mov	r1,r0
+                     144 .LDW22:
+00000160 e1a00001    145 	mov	r0,r1
+00000164 eb000017*   146 	bl	WriteDataLines
+00000168 e59f00f8*   147 	ldr	r0,.L27
+0000016c e3a02001    148 	mov	r2,1
+00000170 e3a019c0    149 	mov	r1,3<<20
+00000174 eb000000*   150 	bl	at91_pio_write
+00000178 ebffffcd*   151 	bl	ToggleEnableLine
+0000017c e3a01e7d    152 	mov	r1,0x07d0
+00000180 e59f80e4*   153 	ldr	r8,.L42
+00000184 e5881008    154 	str	r1,[r8,8]
+00000188 e59f00dc*   155 	ldr	r0,.L42
+0000018c eb000000*   156 	bl	at91_wait_open
+                     157 .LDW32:
+                     158 .LDW42:
+00000190 e8bd4300    159 	ldmfd	[sp]!,{r8-r9,lr}
+00000194 e12fff1e*   160 	ret	
+                     161 	.endf	LCDCmd
+                     162 	.align	4
+                     163 .LDW52:
+                     164 
+                     165 ;command	r1	param
+                     166 
+                     167 	.data
+                     168 	.text
+                     169 	.align	4
+                     170 	.align	4
+                     171 LCDString::
+00000198 e92d4310    172 	stmfd	[sp]!,{r4,r8-r9,lr}
+
+                                                                      Page 4
+                                                              C:\DOCUME~1\csand\LOCALS~1\Temp\gh_581.s
+0000019c e1a04000    173 	mov	r4,r0
+                     174 .LDW62:
+000001a0 ea000003    175 	b	.L76
+                     176 .L78:
+000001a4 e1a01004    177 	mov	r1,r4
+000001a8 e2844001    178 	add	r4,r4,1
+000001ac e5d10000    179 	ldrb	r0,[r1]
+000001b0 ebffffd4*   180 	bl	LCDData
+                     181 .L76:
+000001b4 e5d41000    182 	ldrb	r1,[r4]
+000001b8 e3510000    183 	cmp	r1,0
+000001bc 1afffff8    184 	bne	.L78
+                     185 .LDW72:
+                     186 .LDW82:
+000001c0 e8bd4310    187 	ldmfd	[sp]!,{r4,r8-r9,lr}
+000001c4 e12fff1e*   188 	ret	
+                     189 	.endf	LCDString
+                     190 	.align	4
+                     191 .LDW92:
+                     192 
+                     193 ;p_Str	r4	param
+                     194 
+                     195 	.data
+                     196 	.text
+                     197 	.align	4
+                     198 	.align	4
+                     199 WriteDataLines::
+000001c8 e92d4330    200 	stmfd	[sp]!,{r4-r5,r8-r9,lr}
+000001cc e24dd020    201 	sub	sp,sp,32
+000001d0 e1a05000    202 	mov	r5,r0
+                     203 .LDW03:
+000001d4 e3a04000    204 	mov	r4,0
+000001d8 e1a0c00d    205 	mov	r12,sp
+000001dc e59f408c*   206 	ldr	r4,.L132
+000001e0 e8b4000f    207 	ldmfd	[r4]!,{r0-r3}
+000001e4 e8ac000f    208 	stmea	[r12]!,{r0-r3}
+000001e8 e894000f    209 	ldmfd	[r4],{r0-r3}
+000001ec e88c000f    210 	stmea	[r12],{r0-r3}
+000001f0 e3a04000    211 	mov	r4,0
+                     212 .L98:
+000001f4 e3a03001    213 	mov	r3,1
+000001f8 e1a03413    214 	mov	r3,r3 lsl r4
+000001fc e0033005    215 	and	r3,r3,r5
+00000200 e3530000    216 	cmp	r3,0
+00000204 0a000008    217 	beq	.L99
+00000208 e1a03004    218 	mov	r3,r4
+0000020c e1a03103    219 	mov	r3,r3 lsl 2
+00000210 e1a0c00d    220 	mov	r12,sp
+00000214 e083300c    221 	add	r3,r3,r12
+00000218 e5931000    222 	ldr	r1,[r3]
+0000021c e59f0044*   223 	ldr	r0,.L27
+00000220 e3a02000    224 	mov	r2,0
+00000224 eb000000*   225 	bl	at91_pio_write
+00000228 ea000007    226 	b	.L101
+                     227 .L99:
+0000022c e1a03004    228 	mov	r3,r4
+00000230 e1a03103    229 	mov	r3,r3 lsl 2
+00000234 e1a0c00d    230 	mov	r12,sp
+00000238 e083300c    231 	add	r3,r3,r12
+0000023c e5931000    232 	ldr	r1,[r3]
+00000240 e59f0020*   233 	ldr	r0,.L27
+
+                                                                      Page 5
+                                                              C:\DOCUME~1\csand\LOCALS~1\Temp\gh_581.s
+00000244 e3a02001    234 	mov	r2,1
+00000248 eb000000*   235 	bl	at91_pio_write
+                     236 .L101:
+0000024c e2844001    237 	add	r4,r4,1
+00000250 e3540007    238 	cmp	r4,7
+00000254 daffffe6    239 	ble	.L98
+                     240 .LDW13:
+                     241 .LDW23:
+00000258 e28dd020    242 	add	sp,sp,32
+0000025c e8bd4330    243 	ldmfd	[sp]!,{r4-r5,r8-r9,lr}
+00000260 e12fff1e*   244 	ret	
+                     245 	.endf	WriteDataLines
+                     246 	.align	4
+                     247 .LDW33:
+                     248 ;i	r4	local
+                     249 ;pin_conversions	[sp]	local
+                     250 ;.L128	.L131	static
+                     251 
+                     252 ;byte	r5	param
+                     253 
+                     254 	.section ".rodata","a"
+00000000 00000001    255 .L131:	.data.b	1,0,0,0
+00000004 00000002    256 	.data.b	2,0,0,0
+00000008 00000004    257 	.data.b	4,0,0,0
+0000000c 00000008    258 	.data.b	8,0,0,0
+00000010 00000010    259 	.data.b	16,0,0,0
+00000014 00000020    260 	.data.b	32,0,0,0
+00000018 00000040    261 	.data.b	64,0,0,0
+0000001c 00000080    262 	.data.b	128,0,0,0
+                     263 	.type	.L131,$object
+                     264 	.size	.L131,32
+                     265 	.data
+                     266 	.text
+                     267 	.align	4
+                     268 .L26:
+00000264 003800ff    269 	.data.w	0x003800ff
+                     270 	.type	.L26,$object
+                     271 	.size	.L26,4
+                     272 
+                     273 .L27:
+00000268 00000000*   274 	.data.w	PIOA_DESC
+                     275 	.type	.L27,$object
+                     276 	.size	.L27,4
+                     277 
+                     278 .L42:
+0000026c 00000000*   279 	.data.w	wait_desc
+                     280 	.type	.L42,$object
+                     281 	.size	.L42,4
+                     282 
+                     283 .L132:
+00000270 00000000*   284 	.data.w	.L131
+                     285 	.type	.L132,$object
+                     286 	.size	.L132,4
+                     287 
+                     288 	.align	4
+                     289 ;PIOA_DESC	PIOA_DESC	import
+                     290 ;TC0_DESC	TC0_DESC	import
+                     291 
+                     292 	.data
+                     293 .L148:
+                     294 	.globl	wait_desc
+
+                                                                      Page 6
+                                                              C:\DOCUME~1\csand\LOCALS~1\Temp\gh_581.s
+00000000 00000000*   295 wait_desc:	.data.w	TC0_DESC
+00000004 00008000    296 	.data.b	0,128,0,0
+00000008 00000000    297 	.space	4
+0000000c 00000003    298 	.data.b	3,0,0,0
+00000010 00000000*   299 	.data.w	wake_up_handler
+                     300 	.type	wait_desc,$object
+                     301 	.size	wait_desc,20
+                     302 	.ghsnote version,6
+                     303 	.ghsnote tools,3
+                     304 	.ghsnote options,0
+                     305 	.text
+                     306 	.align	4
+                     307 	.data
+                     308 	.align	4
+                     309 	.section ".rodata","a"
+                     310 	.align	4
+                     311 	.text
+                     312 ..eof.H.3A.5CDocuments.5Ccmpe490.5Clab3.5Cobjs.5Clcd...48.3A.5CDocuments.5Ccmpe490.5Clab3..4B68BEE6..0::

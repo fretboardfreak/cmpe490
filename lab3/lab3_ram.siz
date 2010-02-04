@@ -1,0 +1,8 @@
+lab3_ram         .text         6060
+lab3_ram         .syscall         8
+lab3_ram         .interfunc       4
+lab3_ram         .fixaddr        32
+lab3_ram         .fixtype         8
+lab3_ram         .rodata        540
+lab3_ram         .secinfo        24
+lab3_ram         .data           64

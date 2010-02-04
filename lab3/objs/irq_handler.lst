@@ -1,0 +1,104 @@
+                                                                      Page 1
+                                                              src\cmpe490\irq_handler.arm
+Command Line: C:\GHS\arm423\asarm.exe -elf -b0 -Iinclude -Ilib/m55800_lib16 -Ilib/lib_drv_16 -Ilib/uC -IC:\GHS\arm423\lib\arm4 -cpu=arm7tm -fpu=soft -dbo=H:\Documents\cmpe490\lab3\objs\irq_handler.dbo -armuk --gh_oname=objs\irq_handler.o --gh_md=objs\irq_handler.d -o objs\irq_handler.o -list=objs\irq_handler.lst src\cmpe490\irq_handler.arm 
+Original File: src\cmpe490\irq_handler.arm
+Source File: src\cmpe490\irq_handler.arm
+Directory: H:\Documents\cmpe490\lab3
+Host OS: GHS_WIN32
+Version: EASE 2.0 (c) 2001 Green Hills Software    Build: Feb 22 2006
+Release: MULTI v4.2.3                                                                      
+Revision Date: Fri Mar 24 03:14:01 2006
+
+Release Date: Fri Mar 31 01:02:10 2006
+
+                       1 .text
+                       2 .include "periph/aic/irq.mac"
+                       3 .global irq_asm_irq_handler
+                       4 .import irq_handler
+                       5 	    
+                       6 irq_asm_irq_handler:
+                       7 	    IRQ_ENTRY
+                       7 <MACRO BEGIN>
+                       7 sub r14 , r14 , 4 
+                       7 stmfd sp ! , { r14 } 
+                       7 
+                       7 
+                       7 
+                       7 
+                       7 ldr r14 , = AIC_BASE 
+                       7 str r14 , [ r14 , AIC_IVR ] 
+                       7 
+                       7 
+                       7 mrs r14 , SPSR 
+                       7 stmfd sp ! , { r0 , r14 } 
+                       7 
+                       7 
+                       7 mrs r0 , CPSR 
+                       7 bic r0 , r0 , I_BIT 
+                       7 orr r0 , r0 , ARM_MODE_SYS 
+                       7 msr CPSR_c , r0 
+                       7 
+                       7 
+                       7 IF  =  
+                       7 stmfd sp ! , { r1 - r3 , r12 , r14 } 
+                       7 ELSE 
+                       7 stmfd sp ! , { r1 - r3 , , r12 , r14 } 
+                       7 ENDIF 
+00000000 e24ee004      7 <MACRO END>
+00000004 e92d4000 
+00000008 e3e0eef0 
+0000000c e22ee0ff 
+00000010 e58ee100 
+00000014 e14fe000 
+00000018 e92d4001 
+0000001c e10f0000 
+00000020 e3c00080 
+00000024 e380001f 
+00000028 e121f000 
+0000002c e92d500e 
+00000030 e51f0008*     8 	    ldr r0, =irq_handler
+00000034 e1a0e00f      9 	    mov r14, pc
+00000038 e12fff10*    10 	    bx r0
+                      11 	    IRQ_EXIT
+                      11 <MACRO BEGIN>
+
+                                                                      Page 2
+                                                              src\cmpe490\irq_handler.arm
+                      11 IF  =  
+                      11 ldmia sp ! , { r1 - r3 , r12 , r14 } 
+                      11 ELSE 
+                      11 ldmia sp ! , { r1 - r3 , , r12 , r14 } 
+                      11 ENDIF 
+                      11 
+                      11 
+                      11 mrs r0 , CPSR 
+                      11 bic r0 , r0 , ARM_MODE_SYS 
+                      11 orr r0 , r0 , I_BIT :OR: ARM_MODE_IRQ 
+                      11 msr CPSR_c , r0 
+                      11 
+                      11 
+                      11 ldr r0 , = AIC_BASE 
+                      11 str r0 , [ r0 , AIC_EOICR ] 
+                      11 
+                      11 
+                      11 ldmia sp ! , { r0 , r14 } 
+                      11 msr SPSR_cxsf , r14 
+                      11 
+                      11 
+                      11 ldmia sp ! , { pc } ^ 
+0000003c e8bd500e     11 <MACRO END>
+00000040 e10f0000 
+00000044 e3c0001f 
+00000048 e3800092 
+0000004c e121f000 
+00000050 e3e00ef0 
+00000054 e22000ff 
+00000058 e5800130 
+0000005c e8bd4001 
+00000060 e16ff00e 
+00000064 e8fd8000 
+                      12 
+                      13 	    .type irq_asm_irq_handler, $function
+                      14 	    .size irq_asm_irq_handler, .-irq_asm_irq_handler
+                      15 		
+00000068 014be650*    16 END

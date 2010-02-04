@@ -1,0 +1,440 @@
+Link Date:	Tue Feb 02 17:43:07 2010
+Host OS:	GHS_WIN32
+Version:	ELXR 4.0 (c) 1998-2003 Green Hills Software    Build: Mar 24 2006
+
+
+Load Map Tue Feb 02 17:43:07 2010
+Image Summary
+
+  Section              Base      Size(hex)    Size(dec)  SecOffs
+  .picbase             02000000  00000000            0   00001a0
+  .text                02000000  000017ac         6060   00001a0
+  .syscall             020017ac  00000008            8   000194c
+  .intercall           020017b4  00000000            0   0001954
+  .interfunc           020017b4  00000004            4   0001954
+  .fixaddr             020017b8  00000020           32   0001958
+  .fixtype             020017d8  00000008            8   0001978
+  .rodata              020017e0  0000021c          540   0001980
+  .secinfo             020019fc  00000018           24   0001b9c
+  .pidbase             02001a20  00000000            0   0001bc0
+  .sdabase             02001a20  00000000            0   0001bc0
+  .sbss                02001a20  00000000            0   0001bc0
+  .sdata               02001a20  00000000            0   0001bc0
+  .data                02001a20  00000040           64   0001bc0
+  .bss                 02001a60  00000508         1288   0001c00
+  .heap                02001f70  00007800        30720   0001c08
+  .stack               02009770  00007800        30720   0001c08
+
+Load Map Tue Feb 02 17:43:07 2010
+Module Summary
+
+  Origin+Size    Section          Module
+02000000+0000a8  .text            crt0.o
+020000a8+00006c  .text            irq_handler.o
+02000114+0001a8  .text            lab3.o
+020017e0+0000f8  .rodata          lab3.o
+020002bc+000274  .text            lcd.o
+02001a20+000014  .data            lcd.o
+020018d8+000020  .rodata          lcd.o
+02000530+000030  .text            wait_irq.o
+02000560+000020  .text            libmulti.a
+02001a34+000004  .data            libmulti.a
+02000580+0000cc  .text            lib_drv_16.a(wait.o)
+0200064c+000080  .text            m55800_lib16.a(lib_tc_micro.o)
+02001a38+000008  .data            m55800_lib16.a(lib_m55800.o)
+020018f8+000104  .rodata          m55800_lib16.a(lib_m55800.o)
+020006cc+000108  .text            m55800_lib16.a(lib_apmc55800.o)
+020007d4+00013c  .text            m55800_lib16.a(lib_tc.o)
+02000910+000006  .text            m55800_lib16.a(lib_err.o)
+02000918+000110  .text            m55800_lib16.a(lib_pio.o)
+02000a28+000060  .text            m55800_lib16.a(lib_ext_irq.o)
+02000a88+0000d4  .text            m55800_lib16.a(lib_aic.o)
+02000b5c+000400  .text            libstartup.a(ind_crt0.o)
+02000f5c+0000d8  .text            libstartup.a(ind_uzip.o)
+02001034+0000b0  .text            libstartup.a(ind_mset.o)
+020010e4+000240  .text            libstartup.a(ind_mcpy.o)
+020017ac+000008  .syscall         libsys.a(ind_dots.o)
+02001324+0000ec  .text            libsys.a(ind_crt1.o)
+02001a40+00001c  .data            libsys.a(ind_crt1.o)
+020017b8+00001c  .fixaddr         libsys.a(ind_crt1.o)
+020017d8+000007  .fixtype         libsys.a(ind_crt1.o)
+02001410+0000d8  .text            libsys.a(ind_exit.o)
+02001a5c+000004  .data            libsys.a(ind_exit.o)
+02001a60+000004  .bss             libsys.a(ind_exit.o)
+020017d4+000004  .fixaddr         libsys.a(ind_exit.o)
+020017df+000001  .fixtype         libsys.a(ind_exit.o)
+020014e8+000020  .text            libsys.a(ind_call.o)
+02001508+000148  .text            libsys.a(ind_thrd.o)
+02001650+00007c  .text            libsys.a(ind_errn.o)
+020016cc+0000e0  .text            libarch.a(indarchi.o)
+020017b4+000004  .interfunc       libarch.a(indarch4.o)
+
+Load Map Tue Feb 02 17:43:07 2010
+Global Symbols (sorted alphabetically)
+
+ .rodata          020019e4 ADC0_DESC
+ .rodata          020019ec ADC1_DESC
+ .rodata          020019d4 DAC0_DESC
+ .rodata          020019dc DAC1_DESC
+ .text            020014cc DefaultSignalHandler
+ .rodata          02001938 FIQ_DESC
+ .text            02001564 GetThreadLocalStorage
+ .bss             02001a9c GlobalTLS
+ .rodata          02001908 IRQ0_DESC
+ .rodata          02001910 IRQ1_DESC
+ .rodata          02001918 IRQ2_DESC
+ .rodata          02001920 IRQ3_DESC
+ .rodata          02001928 IRQ4_DESC
+ .rodata          02001930 IRQ5_DESC
+ .text            02000414 LCDCmd
+ .text            020003c4 LCDData
+ .text            020002bc LCDInit
+ .text            02000454 LCDString
+ .bss             02001a64 LCD_MSG
+ .rodata          020018f8 PIOA_DESC
+ .rodata          02001900 PIOB_DESC
+ .data            02001a38 Pioa
+ .data            02001a3c Piob
+ .rodata          020019f4 RTC_DESC
+ .rodata          020019c4 SPI_DESC
+ .rodata          02001964 TC0_DESC
+ .rodata          02001970 TC1_DESC
+ .rodata          0200197c TC2_DESC
+ .rodata          02001988 TC3_DESC
+ .rodata          02001994 TC4_DESC
+ .rodata          020019a0 TC5_DESC
+ .rodata          020019ac TCB0_DESC
+ .rodata          020019b8 TCB1_DESC
+ .text            02000370 ToggleEnableLine
+ .rodata          02001940 USART0_DESC
+ .rodata          0200194c USART1_DESC
+ .rodata          02001958 USART2_DESC
+ .text            02000484 WriteDataLines
+                  00000000 __alt_init
+                  00000000 __cpp_exception_cleanup
+                  00000000 __cpp_exception_init
+                  00000000 __division_by_zero
+ .syscall         020017ac __dotsyscall
+ .text            02001544 __get_eh_globals
+ .text            02001650 __gh_errno_ptr
+                  00000000 __gh_error_init
+ .text            020016ac __gh_get_errno
+                  00000000 __gh_iob_init
+ .text            020015a8 __gh_lock_init
+ .text            02001688 __gh_set_errno
+                  00000000 __gh_signal_init
+ .interfunc       020017b4 __ghsArmBLR
+ .text            02000a28 __ghsINTERAat91_extirq_open
+ .text            02000918 __ghsINTERAat91_pio_open
+ .text            020009b4 __ghsINTERAat91_pio_read
+ .text            02000990 __ghsINTERAat91_pio_write
+ .text            02000580 __ghsINTERAat91_wait_open
+ .text            020016cc __ghsINTERT__udiv_32_32
+ .text            02001580 __ghsLock
+ .text            02001594 __ghsUnlock
+ .text            02001508 __ghs_GetThreadLocalStorageItem
+ .text            020015d4 __ghs_RestoreSignalContext
+ .text            020015bc __ghs_SaveSignalContext
+ .text            0200149c __ghs_at_exit
+                  00000000 __ghs_board_init
+                  00000000 __ghs_checksum
+ .text            02000f5c __ghs_decompress
+ .text            02000078 __ghs_enterblock_func
+ .text            02001628 __ghs_flock_create
+ .text            0200163c __ghs_flock_destroy
+ .text            020015e8 __ghs_flock_file
+ .text            02001610 __ghs_ftrylock_file
+ .text            020015fc __ghs_funlock_file
+ .text            02000b5c __ghs_ind_crt0
+ .text            02001324 __ghs_ind_crt1
+                  00000000 __ghs_manprf_init
+                  00000000 __ghs_rambootcodeend
+                  00000000 __ghs_rambootcodestart
+                  02040000 __ghs_ramend
+                  02000000 __ghs_ramstart
+                  00000000 __ghs_rombootcodeend
+                  00000000 __ghs_rombootcodestart
+                  01200000 __ghs_romend
+                  01000000 __ghs_romstart
+ .text            020014e8 __ghs_syscall
+ .fixaddr         020017b8 __ghsbegin_fixaddr
+ .fixtype         020017d8 __ghsbegin_fixtype
+ .picbase         02000000 __ghsbegin_picbase
+ .pidbase         02001a20 __ghsbegin_pidbase
+                  00000000 __ghsbegin_robase
+ .secinfo         020019fc __ghsbegin_secinfo
+ .secinfo         02001a14 __ghsbinfo_aclear
+ .secinfo         02001a14 __ghsbinfo_acopy
+ .secinfo         020019fc __ghsbinfo_clear
+ .secinfo         02001a14 __ghsbinfo_comacopy
+ .secinfo         02001a14 __ghsbinfo_comcopy
+ .secinfo         02001a14 __ghsbinfo_comtcopy
+ .secinfo         02001a14 __ghsbinfo_copy
+ .secinfo         02001a14 __ghsbinfo_tcopy
+ .secinfo         02001a14 __ghseinfo_clear
+ .secinfo         02001a14 __ghseinfo_comcopy
+ .secinfo         02001a14 __ghseinfo_copy
+ .fixaddr         020017d8 __ghsend_fixaddr
+ .stack           02010f70 __ghsend_stack
+ .text            020016d0 __udiv_32_32
+ .text            02001798 __umod_32_32
+ .text            02001410 _enter
+ .text            02001430 _exit
+ .bss             02001a68 _multiArgs
+ .data            02001a34 _multibufSize
+ .bss             02001b80 _multibuffer
+ .text            02000560 _multiend
+ .text            02000578 _multiend2
+ .text            02000000 _start
+ .text            0200071c at91_clock_close
+ .text            02000758 at91_clock_generator_mode
+ .text            02000766 at91_clock_generator_state
+ .text            0200074a at91_clock_get_pll_status
+ .text            02000732 at91_clock_get_status
+ .text            02000706 at91_clock_open
+ .text            020006cc at91_clock_set_mode
+ .text            02000910 at91_default_error
+ .text            02000a96 at91_default_fiq_handler
+ .text            02000a88 at91_default_irq_handler
+ .text            02000a66 at91_extirq_close
+ .text            02000a30 at91_extirq_open
+ .text            0200079e at91_interrupt_disable
+ .text            02000790 at91_interrupt_enable
+ .text            02000ad8 at91_irq_close
+ .text            02000b2a at91_irq_get_status
+ .text            02000aa4 at91_irq_open
+ .text            02000b0a at91_irq_trig_cmd
+ .text            02000980 at91_pio_close
+ .text            02000920 at91_pio_open
+ .text            020009be at91_pio_read
+ .text            020009f4 at91_pio_set_mode
+ .text            02000998 at91_pio_write
+ .text            02000774 at91_power_mode
+ .text            02000838 at91_tc_close
+ .text            0200064c at91_tc_compute_microsec
+ .text            0200085a at91_tc_get_status
+ .text            020007d4 at91_tc_open
+ .text            020008ba at91_tc_read
+ .text            02000898 at91_tc_set_mode
+ .text            02000868 at91_tc_trig_cmd
+ .text            020008ea at91_tc_write
+ .text            02000782 at91_trig_cmd
+ .text            02000588 at91_wait_open
+ .bss             02001a98 environ
+ .bss             02001b7c errno
+ .text            020000a8 irq_asm_irq_handler
+ .text            02000188 irq_handler
+ .text            02000114 main
+ .text            020010e4 memcpy
+ .text            02001034 memset
+ .data            02001a20 wait_desc
+ .text            02000530 wake_up_handler
+
+Load Map Tue Feb 02 17:43:07 2010
+Global Cross Reference
+
+ADC0_DESC          
+ADC1_DESC          
+DAC0_DESC          
+DAC1_DESC          
+DefaultSignalHandler libsys.a(ind_exit.o)    20014e4
+FIQ_DESC           
+GetThreadLocalStorage libsys.a(ind_crt1.o)    2001388
+                    libsys.a(ind_exit.o)    2001478
+                    libsys.a(ind_errn.o)    2001670 2001680
+GlobalTLS           libsys.a(ind_thrd.o)    2001540 2001560 200157c
+IRQ0_DESC          
+IRQ1_DESC           lab3.o                  200026c
+IRQ2_DESC          
+IRQ3_DESC          
+IRQ4_DESC          
+IRQ5_DESC          
+LCDCmd              lcd.o                   2000308 2000334 2000350 2000364 2000450
+                    lab3.o                  200024c
+LCDData             lcd.o                   2000410 200046c
+LCDInit             lcd.o                   200036c
+                    lab3.o                  2000168
+LCDString           lcd.o                   2000480
+                    lab3.o                  2000180 2000254
+LCD_MSG             lab3.o                  2000274
+PIOA_DESC           lcd.o                   2000524
+PIOB_DESC           lab3.o                  2000264
+Pioa               
+Piob               
+RTC_DESC           
+SPI_DESC           
+TC0_DESC            lab3.o                  20017e0
+                    lcd.o                   2001a20
+TC1_DESC           
+TC2_DESC           
+TC3_DESC           
+TC4_DESC           
+TC5_DESC           
+TCB0_DESC          
+TCB1_DESC          
+ToggleEnableLine    lcd.o                   20003c0 20003f4 2000434
+USART0_DESC        
+USART1_DESC        
+USART2_DESC        
+WriteDataLines      lcd.o                   20003d0 2000420 200051c
+__alt_init          libsys.a(ind_crt1.o)    20013e8 2001a58
+__cpp_exception_cleanup libsys.a(ind_exit.o)    2001480 2001a5c
+__cpp_exception_init libsys.a(ind_crt1.o)    2001390 2001a50
+__division_by_zero  libarch.a(indarchi.o)   20016d8
+__dotsyscall        crt0.o                  2000018
+                    libsys.a(ind_call.o)    20014f4
+__get_eh_globals    libsys.a(ind_thrd.o)    200155c
+__gh_errno_ptr      libsys.a(ind_errn.o)    200166c 200167c 2001698 20016b8
+__gh_error_init     libsys.a(ind_crt1.o)    2001368 2001a48
+__gh_get_errno      libsys.a(ind_errn.o)    20016c8
+__gh_iob_init       libsys.a(ind_crt1.o)    200135c 2001a44
+__gh_lock_init      libsys.a(ind_thrd.o)    20015b8
+                    libsys.a(ind_crt1.o)    2001350 2001a40
+__gh_set_errno      libsys.a(ind_errn.o)    20016a8
+                    libsys.a(ind_call.o)    20014fc
+__gh_signal_init    libsys.a(ind_crt1.o)    2001378 2001a4c
+__ghsArmBLR         libarch.a(indarch4.o)   20017b4
+                    libstartup.a(ind_crt0.o) 2000cd8 2000d4c 2000dc8 2000f00
+                    libsys.a(ind_exit.o)    2001458
+__ghsINTERAat91_extirq_open
+__ghsINTERAat91_pio_open
+__ghsINTERAat91_pio_read
+__ghsINTERAat91_pio_write
+__ghsINTERAat91_wait_open
+__ghsINTERT__udiv_32_32
+__ghsLock           libsys.a(ind_thrd.o)    2001590
+                    libsys.a(ind_exit.o)    2001444 20014b0
+__ghsUnlock         libsys.a(ind_thrd.o)    20015a4
+                    libsys.a(ind_exit.o)    20014bc
+__ghs_GetThreadLocalStorageItem
+__ghs_RestoreSignalContext libsys.a(ind_thrd.o)    20015e4
+__ghs_SaveSignalContext libsys.a(ind_thrd.o)    20015d0
+__ghs_at_exit       libsys.a(ind_exit.o)    20014c4
+__ghs_board_init    crt0.o                  200000c
+__ghs_checksum      libstartup.a(ind_crt0.o) 2000f58
+__ghs_decompress    libstartup.a(ind_uzip.o) 2000f78 2000fa4 2000fd8 2000fe0 2000ff8
+                                            2000ffc 2001010 2001024 200102c
+                    libstartup.a(ind_crt0.o) 2000f44
+__ghs_enterblock_func crt0.o                  2000078
+__ghs_flock_create  libsys.a(ind_thrd.o)    2001638
+__ghs_flock_destroy libsys.a(ind_thrd.o)    200164c
+__ghs_flock_file    libsys.a(ind_thrd.o)    20015f8
+__ghs_ftrylock_file libsys.a(ind_thrd.o)    2001624
+__ghs_funlock_file  libsys.a(ind_thrd.o)    200160c
+__ghs_ind_crt0      libstartup.a(ind_crt0.o) 2000c24 2000c84 2000cbc 2000ce8 2000d18
+                                            2000d5c 2000d94 2000dd8 2000e20 2000e24
+                                            2000e54 2000e5c 2000e7c 2000e84 2000e94
+                                            2000eb4 2000ebc 2000ee4 2000f08
+                    crt0.o                  200005c
+__ghs_ind_crt1      libsys.a(ind_crt1.o)    2001384 2001404
+                    libstartup.a(ind_crt0.o) 2000f0c
+__ghs_manprf_init   libsys.a(ind_crt1.o)    200139c 2001a54
+__ghs_rambootcodeend crt0.o                  200009c
+__ghs_rambootcodestart crt0.o                  2000098
+__ghs_ramend       
+__ghs_ramstart     
+__ghs_rombootcodeend crt0.o                  20000a4
+__ghs_rombootcodestart crt0.o                  20000a0
+__ghs_romend       
+__ghs_romstart     
+__ghs_syscall       libsys.a(ind_exit.o)    2001424 200148c
+__ghsbegin_fixaddr  libstartup.a(ind_crt0.o) 2000f54
+__ghsbegin_fixtype  libstartup.a(ind_crt0.o) 2000f4c
+__ghsbegin_picbase  crt0.o                  200008c
+                    libstartup.a(ind_crt0.o) 2000f1c
+__ghsbegin_pidbase  crt0.o                  2000094
+                    libstartup.a(ind_crt0.o) 2000f24
+__ghsbegin_robase   crt0.o                  2000090
+                    libstartup.a(ind_crt0.o) 2000f20
+__ghsbegin_secinfo  libstartup.a(ind_crt0.o) 2000f18
+__ghsbinfo_aclear  
+__ghsbinfo_acopy   
+__ghsbinfo_clear    libstartup.a(ind_crt0.o) 2000f28
+__ghsbinfo_comacopy
+__ghsbinfo_comcopy  libstartup.a(ind_crt0.o) 2000f3c
+__ghsbinfo_comtcopy libstartup.a(ind_crt0.o) 2000f40
+__ghsbinfo_copy     libstartup.a(ind_crt0.o) 2000f30
+__ghsbinfo_tcopy    libstartup.a(ind_crt0.o) 2000f34
+__ghseinfo_clear    libstartup.a(ind_crt0.o) 2000f2c
+__ghseinfo_comcopy  libstartup.a(ind_crt0.o) 2000f48
+__ghseinfo_copy     libstartup.a(ind_crt0.o) 2000f38
+__ghsend_fixaddr    libstartup.a(ind_crt0.o) 2000f50
+__ghsend_stack      crt0.o                  2000084
+__udiv_32_32        libarch.a(indarchi.o)   20016dc 2001794 200179c
+                    m55800_lib16.a(lib_tc_micro.o) 200065a
+__umod_32_32        libarch.a(indarchi.o)   20017a8
+_enter              libsys.a(ind_exit.o)    200142c
+                    libsys.a(ind_crt1.o)    2001344
+_exit               libsys.a(ind_exit.o)    2001450 2001464 2001474 2001490 20014dc
+                    libsys.a(ind_crt1.o)    20013fc
+_multiArgs         
+_multibufSize      
+_multibuffer       
+_multiend           libmulti.a              2000574
+_multiend2         
+_start             
+at91_clock_close    m55800_lib16.a(lib_tc.o) 200084e
+                    m55800_lib16.a(lib_pio.o) 20009e8
+at91_clock_generator_mode
+at91_clock_generator_state
+at91_clock_get_pll_status
+at91_clock_get_status m55800_lib16.a(lib_pio.o) 20009c4
+at91_clock_open     m55800_lib16.a(lib_tc.o) 20007e4
+                    m55800_lib16.a(lib_pio.o) 20009ce
+at91_clock_set_mode lib_drv_16.a(wait.o)    200060e 2000616
+at91_default_error  m55800_lib16.a(lib_tc_micro.o) 200066c 20006bc
+                    m55800_lib16.a(lib_apmc55800.o) 20006fc
+                    m55800_lib16.a(lib_aic.o) 2000a8c 2000a9a
+at91_default_fiq_handler m55800_lib16.a(lib_aic.o) 2000b4c
+at91_default_irq_handler m55800_lib16.a(lib_aic.o) 2000b50
+at91_extirq_close  
+at91_extirq_open    m55800_lib16.a(lib_ext_irq.o) 2000a28
+                    lab3.o                  2000164
+at91_interrupt_disable
+at91_interrupt_enable
+at91_irq_close      lib_drv_16.a(wait.o)    2000636
+                    m55800_lib16.a(lib_ext_irq.o) 2000a46 2000a74
+at91_irq_get_status
+at91_irq_open       lib_drv_16.a(wait.o)    20005e6
+                    m55800_lib16.a(lib_ext_irq.o) 2000a5a
+at91_irq_trig_cmd  
+at91_pio_close      m55800_lib16.a(lib_tc.o) 200080e
+                    m55800_lib16.a(lib_ext_irq.o) 2000a4e
+at91_pio_open       m55800_lib16.a(lib_pio.o) 2000918
+                    lab3.o                  2000140
+                    lcd.o                   20002d0
+                    m55800_lib16.a(lib_ext_irq.o) 2000a7e
+at91_pio_read       m55800_lib16.a(lib_pio.o) 20009b4
+                    lab3.o                  2000194
+at91_pio_set_mode  
+at91_pio_write      m55800_lib16.a(lib_pio.o) 2000990
+                    lab3.o                  2000150
+                    lcd.o                   20002e0 2000380 20003a4 20003e0 20003f0
+                                            2000430 20004e0 2000504
+at91_power_mode    
+at91_tc_close       lib_drv_16.a(wait.o)    200063c
+at91_tc_compute_microsec lib_drv_16.a(wait.o)    20005ba
+at91_tc_get_status 
+at91_tc_open        lib_drv_16.a(wait.o)    20005a0
+at91_tc_read       
+at91_tc_set_mode    lib_drv_16.a(wait.o)    20005d0
+at91_tc_trig_cmd    lib_drv_16.a(wait.o)    20005f6
+at91_tc_write       lib_drv_16.a(wait.o)    20005d8
+at91_trig_cmd      
+at91_wait_open      lib_drv_16.a(wait.o)    2000580
+                    lcd.o                   2000394 20003b8 2000408 2000448
+environ             libsys.a(ind_crt1.o)    200140c
+errno               libsys.a(ind_errn.o)    2001684
+irq_asm_irq_handler irq_handler.o           20000e0
+                    lab3.o                  2000268
+irq_handler         lab3.o                  200025c
+                    irq_handler.o           2000110
+main                libsys.a(ind_crt1.o)    20013f8
+memcpy              libstartup.a(ind_mcpy.o) 2001320
+                    libstartup.a(ind_crt0.o) 2000f14
+memset              libstartup.a(ind_mset.o) 2001044 20010b4 20010d0 20010e0
+                    libstartup.a(ind_crt0.o) 2000f10
+wait_desc           lcd.o                   2000528
+                    wait_irq.o              200055c
+wake_up_handler     lab3.o                  20017f0
+                    lcd.o                   2001a30

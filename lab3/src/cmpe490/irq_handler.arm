@@ -1,0 +1,16 @@
+.text
+.include "periph/aic/irq.mac"
+.global irq_asm_irq_handler
+.import irq_handler
+	    
+irq_asm_irq_handler:
+	    IRQ_ENTRY
+	    ldr r0, =irq_handler
+	    mov r14, pc
+	    bx r0
+	    IRQ_EXIT
+
+	    .type irq_asm_irq_handler, $function
+	    .size irq_asm_irq_handler, .-irq_asm_irq_handler
+		
+END
