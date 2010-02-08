@@ -87,7 +87,7 @@ void WriteDataLines(char);
 #define	  OPT_FONT_5X7		0x00	// fonts are 5x7 dots
 
 #define	  CMD_SET_CGRAM_ADD	0x40	// set CGRAM address
-// you must provide the address in DB5-DB
+// you must provide the address in DB5-DB0
 
 #define	  CMD_SET_DDRAM_ADD	0x80	// set DDRAM address
 // you must provide the address in DB6-DB0

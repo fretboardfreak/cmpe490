@@ -23,7 +23,6 @@
 #include "parts/m55800/lib_m55800.h"
 #include "drivers/wait/wait.h"
 
-
 //*----------------------------------------------------------------------------
 //* Function Name       : main
 //* Object              : Main function of the led swing
@@ -123,8 +122,12 @@ void irq_handler(void){
 	    break;
 	default:
 	    output = "unknown button";
+<<<<<<< HEAD:lab3/src/cmpe490/lab3.c
 	    }
     LCDCmd(CMD_CLEAR_DISPLAY);
+=======
+    }
+>>>>>>> 126c0089cddd64b3b73dac6f7169f7796479b93c:lab3/src/cmpe490/lab3.c
     LCDString(output);
 }
 
