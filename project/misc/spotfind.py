@@ -1,5 +1,7 @@
-#!/usr/bin/python
-#test of range finding, the two provided jpgs look at a light source 1.9m away
+#!/usr/bin/python 
+
+#test of range finding, the two provided jpgs look at a light source
+#1.9m away
 
 import math, os, sys
 from PIL import Image
