@@ -1,6 +1,6 @@
-/*Camera Driver Header file
- * This file contains all the macros, structure definitions, and function prototypes for
- * the C328-7640 uart camera driver
+/*Camera Driver Header file This file contains all the macros,
+ * structure definitions, and function prototypes for the C328-7640
+ * uart camera driver
  */
 
 #ifndef CAMERA_H
@@ -8,111 +8,125 @@
 
 #include "periph/usart/lib_usart.h"
 
-/*Camera Instruction Set*/     /*1st Parameter  2nd Parameter  3rd Parameter  4th Parameter  */
- #define INITIAL          0x01 /*0x00           colour type    preview res    jpeg resolution*/
- #define GET_PICTURE      0x04 /*picture type   0x00           0x00           0x00           */
- #define SNAPSHOT         0x05 /*snapshot type  skip byte 0    skip byte 1    0x00           */
- #define SET_PACKAGE_SIZE 0x06 /*0x08           pkg size 0     pkg size 1     0x00           */
- #define SET_BAUDRATE     0x07 /*first divider  second divider 0x00           0x00           */
- #define RESET            0x08 /*reset type     0x00           0x00           0x00           */
- #define POWER_OFF        0x09 /*0x00           0x00           0x00           0x00           */
- #define DATA             0x0A /*data type      data size 0    data size 1    data size 2    */
- #define SYNC             0x0D /*0x00           0x00           0x00           0x00           */
- #define ACK              0x0E /*command id     ack counter    pkg id 0       pkg id 1       */
- #define NAK              0x0F /*0x00           nak counter    error code     0x00           */
- #define LIGHT_FREQUENCY  0x13 /*frequency type 0x00           0x00           0x00           */
+/*Camera Instruction Set*/     
+/*1st Parameter  2nd Parameter  3rd Parameter  4th Parameter  */
+#define INITIAL          0x01 
+/*0x00           colour type    preview res    jpeg resolution*/
+#define GET_PICTURE      0x04 
+/*picture type   0x00           0x00           0x00           */
+#define SNAPSHOT         0x05 
+/*snapshot type  skip byte 0    skip byte 1    0x00           */
+#define SET_PACKAGE_SIZE 0x06 
+/*0x08           pkg size 0     pkg size 1     0x00           */
+#define SET_BAUDRATE     0x07 
+/*first divider  second divider 0x00           0x00           */
+#define RESET            0x08 
+/*reset type     0x00           0x00           0x00           */
+#define POWER_OFF        0x09 
+/*0x00           0x00           0x00           0x00           */
+#define DATA             0x0A 
+/*data type      data size 0    data size 1    data size 2    */
+#define SYNC             0x0D 
+/*0x00           0x00           0x00           0x00           */
+#define ACK              0x0E 
+/*command id     ack counter    pkg id 0       pkg id 1       */
+#define NAK              0x0F 
+/*0x00           nak counter    error code     0x00           */
+#define LIGHT_FREQUENCY  0x13 
+/*frequency type 0x00           0x00           0x00           */
 
 /*Command Header and empty parameters*/
- #define HEAD  0xAA
- #define EMPTY 0x00
+#define HEAD  0xAA
+#define EMPTY 0x00
 
 /*INITIAL Parameters*/
- /*Color Type*/
- #define COLOR_TYPE_2_BIT_GREY   0x01
- #define COLOR_TYPE_4_BIT_GREY   0x02
- #define COLOR_TYPE_8_BIT_GREY   0x03
- #define COLOR_TYPE_12_BIT_COLOR 0x05
- #define COLOR_TYPE_16_BIT_COLOR 0x06
- #define COLOR_TYPE_JPEG         0x07
+/*Color Type*/
+#define COLOR_TYPE_2_BIT_GREY   0x01
+#define COLOR_TYPE_4_BIT_GREY   0x02
+#define COLOR_TYPE_8_BIT_GREY   0x03
+#define COLOR_TYPE_12_BIT_COLOR 0x05
+#define COLOR_TYPE_16_BIT_COLOR 0x06
+#define COLOR_TYPE_JPEG         0x07
 
- /*Preview Resolution*/
- #define PREVIEW_RES_80x60   0x01
- #define PREVIEW_RES_160x120 0x03/*note: 0x05 and 0x07 will work here as well, although they are not
-                                         described in the users manual explicitely and will give the
-                                         same resolutions they do for JPEG resolution*/
+/*Preview Resolution*/
+#define PREVIEW_RES_80x60   0x01
+#define PREVIEW_RES_160x120 0x03
+/*note: 0x05 and 0x07 will work here as well, although they are not                                 
+        described in the users manual explicitely and will give the                                 
+        same resolutions they do for JPEG resolution*/
 
- /*JPEG Resolution*/
- #define JPEG_RES_80x64   0x01
- #define JPEG_RES_160x128 0x03
- #define JPEG_RES_320x240 0x05
- #define JPEG_RES_640x480 0x07
+/*JPEG Resolution*/
+#define JPEG_RES_80x64   0x01
+#define JPEG_RES_160x128 0x03
+#define JPEG_RES_320x240 0x05
+#define JPEG_RES_640x480 0x07
 
 /*GET_PICTURE Parameters*/
- /*Picture Type*/
- #define PICTURE_TYPE_SNAPSHOT 0x01
- #define PICTURE_TYPE_PREVIEW  0x02
- #define PICTURE_TYPE_JPEG     0x05
+/*Picture Type*/
+#define PICTURE_TYPE_SNAPSHOT 0x01
+#define PICTURE_TYPE_PREVIEW  0x02
+#define PICTURE_TYPE_JPEG     0x05
 
 /*SNAPSHOT Parameters*/
- /*Sanpshot Type*/
- #define SNAPSHOT_TYPE_COMPRESSED   0x00
- #define SNAPSHOT_TYPE_UNCOMPRESSED 0x01
+/*Sanpshot Type*/
+#define SNAPSHOT_TYPE_COMPRESSED   0x00
+#define SNAPSHOT_TYPE_UNCOMPRESSED 0x01
 
 /*SET_BAUDRATE Parameters*/
- /*1st Divider*/
- #define BAUDRATE_7200   0xFF
- #define BAUDRATE_9600   0xBF
- #define BAUDRATE_14400  0x7F
- #define BAUDRATE_19200  0x5F
- #define BAUDRATE_28800  0x3F
- #define BAUDRATE_38400  0x2F
- #define BAUDRATE_57600  0x1F
- #define BAUDRATE_115200 0x0F
+/*1st Divider*/
+#define BAUDRATE_7200   0xFF
+#define BAUDRATE_9600   0xBF
+#define BAUDRATE_14400  0x7F
+#define BAUDRATE_19200  0x5F
+#define BAUDRATE_28800  0x3F
+#define BAUDRATE_38400  0x2F
+#define BAUDRATE_57600  0x1F
+#define BAUDRATE_115200 0x0F
 
- /*2nd Divider*/
- #define BAUDRATE_DIVIDER 0x01
+/*2nd Divider*/
+#define BAUDRATE_DIVIDER 0x01
 
 /*RESET Parameters*/
- /*Reset Type*/
- #define RESET_HARD 0x00
- #define RESET_SOFT 0x01
+/*Reset Type*/
+#define RESET_HARD 0x00
+#define RESET_SOFT 0x01
 
 /*DATA Parameters*/
- /*Data Type*/
- #define DATA_TYPE_SNAPSHOT 0x01
- #define DATA_TYPE_PREVIEW  0x02
- #define DATA_TYPE_JPEG     0x05
+/*Data Type*/
+#define DATA_TYPE_SNAPSHOT 0x01
+#define DATA_TYPE_PREVIEW  0x02
+#define DATA_TYPE_JPEG     0x05
 
 /*NAK Parameters*/
- /*Error Code*/
- #define ERR_PIC_TYPE              0x01
- #define ERR_PIC_UP_SCALE          0x02
- #define ERR_PIC_SCALE             0x03
- #define ERR_UNEXPECTED_REPLY      0x04
- #define ERR_SEND_PIC_TIMEOUT      0x05
- #define ERR_UNEXPECTED_CMD        0x06
- #define ERR_SRAM_JPEG_TYPE        0x07
- #define ERR_SRAM_JPEG_SIZE        0x08
- #define ERR_PIC_FORMAT            0x09
- #define ERR_PIC_SIZE              0x0A
- #define ERR_PARAMETER             0x0B
- #define ERR_SEND_REGISTER_TIMEOUT 0x0C
- #define ERR_CMD_ID                0x0D
- #define ERR_PIC_NOT_READY         0x0F
- #define ERR_PACKAGE_NUMBER        0x10
- #define ERR_WRONG_PACKAGE_SIZE    0x11
- #define ERR_CMD_HEADER            0xF0
- #define ERR_CMD_LENGTH            0xF1
- #define ERR_SEND_PIC              0xF5
- #define ERR_SEND_CMD              0xFF
+/*Error Code*/
+#define ERR_PIC_TYPE              0x01
+#define ERR_PIC_UP_SCALE          0x02
+#define ERR_PIC_SCALE             0x03
+#define ERR_UNEXPECTED_REPLY      0x04
+#define ERR_SEND_PIC_TIMEOUT      0x05
+#define ERR_UNEXPECTED_CMD        0x06
+#define ERR_SRAM_JPEG_TYPE        0x07
+#define ERR_SRAM_JPEG_SIZE        0x08
+#define ERR_PIC_FORMAT            0x09
+#define ERR_PIC_SIZE              0x0A
+#define ERR_PARAMETER             0x0B
+#define ERR_SEND_REGISTER_TIMEOUT 0x0C
+#define ERR_CMD_ID                0x0D
+#define ERR_PIC_NOT_READY         0x0F
+#define ERR_PACKAGE_NUMBER        0x10
+#define ERR_WRONG_PACKAGE_SIZE    0x11
+#define ERR_CMD_HEADER            0xF0
+#define ERR_CMD_LENGTH            0xF1
+#define ERR_SEND_PIC              0xF5
+#define ERR_SEND_CMD              0xFF
 
 /*Light Frequency Parameters*/
- /*Frequency Type*/
- #define FREQUENCY_50HZ 0x00
- #define FREQUENCY_60HZ 0x01
+/*Frequency Type*/
+#define FREQUENCY_50HZ 0x00
+#define FREQUENCY_60HZ 0x01
 
 /*Misc. Definitions*/
- #define CMD_SIZE 6
+#define CMD_SIZE 6
 
 /*Camera Descriptor Structure Definition*/
 typedef struct
@@ -135,8 +149,14 @@ typedef struct
 
 /*Function Prototypes*/
 u_int sync_camera ( CameraDesc * camera_desc );
-u_int init_camera ( CameraDesc * camera_desc, char colour_type, char preview_res, char jpeg_res );
-void * take_picture ( CameraDesc * camera_desc, char snapshot_type, char picture_type, u_int pkg_size );
+u_int init_camera ( CameraDesc * camera_desc, 
+                    char colour_type, 
+                    char preview_res, 
+                    char jpeg_res );
+void * take_picture ( CameraDesc * camera_desc, 
+                      char snapshot_type, 
+                      char picture_type, 
+                      u_int pkg_size );
 CommandFrame * get_frame ( char * buffer );
 
 #endif
