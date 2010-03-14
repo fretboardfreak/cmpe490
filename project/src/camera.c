@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "camera.h"
+#include "user/camera.h"
 #include "parts/m55800/lib_m55800.h"
 #include "drivers/capture/capture.h"
 #include "drivers/wait/wait.h"
@@ -23,15 +23,16 @@ u_int sync_camera ( CameraDesc * camera_desc )
   u_int i, status, return_val = FALSE;
   char * buffer;
   CommandFrame sync = { HEAD, SYNC, EMPTY, EMPTY, EMPTY, EMPTY };
-  CommandFrame ack  = { HEAD, ACK , SYNC , EMPTY, EMPTY, EPMTY };
-  CommandFrame rec_ack, rec_sync;
+  CommandFrame ack  = { HEAD, ACK , SYNC , EMPTY, EMPTY, EMPTY };
+  CommandFrame rec_ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
+  CommandFrame rec_sync = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
   /*Set clock for wait function*/
-  wait_desc.mcki_khz = 32000; /*clock speed: 32kHz*/
-  wait_desc.period = 1000; /*time between transmissions: 1s*/
+  wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
+  wait_desc.period = DELAY; /*time between transmissions: 1s*/
 
   /*Create the buffer*/
-  buffer = malloc ( 2 * CMD_SIZE );
-  memset ( buffer, 0, 2 * CMD_SIZE );
+  buffer = malloc ( 3 * CMD_SIZE ); /*oversized buffer in case of offset*/
+  memset ( buffer, 0, 3 * CMD_SIZE );
 
   /*Open the usart*/
   at91_usart_open ( camera_desc->usart_desc, 
@@ -41,41 +42,37 @@ u_int sync_camera ( CameraDesc * camera_desc )
   /*Set up the receive buffer*/
   at91_usart_receive_frame ( camera_desc->usart_desc, 
                              buffer, 
-                             2 * CMD_SIZE, 
+                             3 * CMD_SIZE, 
                              0 );
 
   /*Send the sync command*/
   
   /*Camera needs sync sent up to 60 times to detect baudrate*/
-  for ( i = 0 ; i < 60 ; i++ )
+  for ( i = 0 ; i < SYNC_ATTEMPTS ; i++ )
     {
       /*Send SYNC*/
-      at91_usart_send_frame ( camera_desc->usart_desc, 
-                              (char*) sync, CMD_SIZE );
+      send_command ( camera_desc, & sync );
       /*Delay before next attempt*/
       at91_wait_open ( & wait_desc );
       status = at91_usart_get_status ( camera_desc->usart_desc );
 
-      /*Check if something was received, need to refactor this section*/
-      /* using get_frame()*/                                            
+      /*Check if something was received*/                                           
       if ( status & US_RXRDY ) 
 	{
-          /*Get first received frame*/
-	  rec_ack = (CommandFrame) buffer;
-          /*Get second received frame*/
-	  rec_sync = (CommandFrame) ( buffer + CMD_SIZE );
-
-	  if ( rec_ack.command == 
-               ACK && rec_ack.param1 == 
-               SYNC && rec_sync.command == 
-               SYNC )
+          /*Try to get the frames*/
+	  if ( get_frame ( buffer, & rec_ack, 3 * CMD_SIZE, 1 )
+	       && get_frame (buffer, & rec_sync, 3 * CMD_SIZE, 2 ) )
 	    {
-              /*Send ACK*/
-	      at91_usart_send_Frame ( camer_desc->usart_desc, 
-                                      (char*) ack, CMD_SIZE );
-	      return_val = TRUE;
+	      if ( rec_ack.command == ACK 
+		   && rec_ack.param1 == SYNC 
+		   && rec_sync.command == SYNC )
+		{
+		  /*Send ACK*/
+		  send_command ( camera_desc, & ack );
+		  return_val = TRUE;
+		  break;
+		}
 	    }
-	  break;
 	}
 	 
     }
@@ -91,22 +88,162 @@ u_int init_camera ( CameraDesc * camera_desc,
                     char colour_type,
                     char preview_res,
                     char jpeg_res )
-{}
+{
+  CommandFrame init = { HEAD, INITIAL, EMPTY, EMPTY, EMPTY, EMPTY };
+ 
+  /*Fill the init parameters*/
+  init.param2 = colour_type;
+  init.param3 = preview_res;
+  init.param4 = jpeg_res;
+
+  /*Send INITIAL to the camera and listen for ACK*/
+  return send_command_get_ack ( camera_desc, & init );
+ 
+}
 
 /*Gets a picture from the camera Sends all the commands required to get a
  * picture from the camera.  Sends SET_PACKAGE_SIZE, then SNAPSHOT, then
  * GET_PICTURE.  Camera sends DATA command containing the size of the image to
  * be sent to the board.  The image is then sent in packets and the image data
- * is extraced and stored in a buffer.  That buffer is returned
+ * is extracted and stored in a buffer.  That buffer is returned.
  */
 void * take_picture ( CameraDesc * camera_desc,
                       char snapshot_type,
                       char picture_type,
                       u_int pkg_size )
-{}
+{
+  char * buffer, pkgsize0, pkgsize1;
+  u_int status, i;
+  CommandFrame set_pkg_size = { HEAD, SET_PACKAGE_SIZE, EMPTY, 
+				EMPTY, EMPTY, EMPTY };
+  CommandFrame snap = { HEAD, SNAPSHOT, EMPTY, EMPTY, EMPTY, EMPTY };
+  CommandFrame get_pic = { HEAD, GET_PICTURE, EMPTY, EMPTY, EMPTY, EMPTY };
+  CommandFrame ack = { HEAD, ACK, EMPTY, EMPTY, EMPTY, EMPTY };
+  /*Set clock for wait function*/
+  wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
+  wait_desc.period = DELAY; /*time between transmissions: 1s*/
 
-/*Finds a valid frame in a buffer Looks for a 0xAA in the buffer and returns
- * that point as a CommandFrame pointer
+  /*Create the buffer*/
+  buffer = malloc ( 3 * CMD_SIZE ); /*oversized buffer in case of offset*/
+  memset ( buffer, 0, 3 * CMD_SIZE );
+
+  /*Calculate values for set_package_size parameters*/
+  pkgsize0 = (char) ( pkg_size & 0x00FF );
+  pkgsize1 = (char) ( ( pkg_size & 0xFF00 >> 8) );
+
+  /*Fill the frame parameters*/
+  snap.param1 = snapshot_type;
+  get_pic.param1 = picture_size;
+  set_pkg_size.param1 = 0x08;
+  set_pkg_size.param2 = pkgsize0;
+  set_pkg_size.param3 = pkgsize1;
+  
+
+  /*Set up the receive buffer*/
+  at91_usart_receive_frame ( camera_desc->usart_desc, 
+                             buffer, 
+                             3 * CMD_SIZE, 
+                             0 );
+  /*Send SET_PACKAGE_SIZE to the camera and wait for an ACK*/
+  send_command_get_ack ( camera_desc, & set_pkg_size );
+}
+
+/*Finds a valid frame in a buffer. Looks for the number'th instance of 0xAA and
+ * copies it and the next 5 bytes from the buffer into frame. TRUE or FALSE are
+ * returned to indicate success of failure.
  */
-CommandFrame * get_frame ( char * buffer )
-{}
+u_int get_frame ( char * buffer, 
+		  CommandFrame * frame,
+		  u_int size, 
+		  u_int number )
+{
+  u_int i;
+
+  for ( i = 0 ; i < size ; i++ )
+    {
+      if ( buffer[i] == HEAD )/*found a frame*/
+	{
+	  if ( --number == 0 )
+	    {
+	      frame->header = buffer[i];           /*fill the command struct*/
+	      frame->command = buffer[i+1];
+	      frame->param1 = buffer[i+2];
+	      frame->param2 = buffer[i+3];
+	      frame->param3 = buffer[i+4];
+	      frame->param4 = buffer[i+5];
+
+	      return TRUE;                         /*return success*/
+	    }
+	}
+    }
+  return FALSE; /*couldn't find enough frames in the buffer*/
+}
+
+/*Sends commands to the camera.  First packs the command frame into a character
+ * array then sends that frame over the usart
+ */ 
+void send_command ( CameraDesc * camera_desc, CommandFrame * frame ) 
+{ 
+  char packet[CMD_SIZE];
+  packet[0] = frame->header;
+  packet[1] = frame->command;
+  packet[2] = frame->param1; 
+  packet[3] = frame->param2;
+  packet[4] = frame->param3; 
+  packet[5] = frame->param4;
+
+  at91_usart_send_frame ( camera_desc->usart_desc, packet, CMD_SIZE );
+}
+
+/*Many of the commands sent to the camera simply wait for the camera to
+ * acknowledge that they were received before proceeding.  This function tries
+ * sending these commands several times and checking for ACK to be received.
+ * Returns TRUE or FALSE based on success.
+ */
+u_int send_command_get_ack ( CameraDesc * camera_desc, 
+			     CommandFrame * frame )
+{
+  char * buffer;
+  u_int status, i, return_val = FALSE;
+  CommandFrame ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
+
+  /*Set clock for wait function*/
+  wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
+  wait_desc.period = DELAY; /*time between transmissions: 1s*/
+
+  /*Create the buffer*/
+  buffer = malloc ( 2 * CMD_SIZE ); /*oversized buffer in case of offset*/
+  memset ( buffer, 0, 2 * CMD_SIZE );
+
+  /*Set up the receive buffer*/
+  at91_usart_receive_frame ( camera_desc->usart_desc, 
+                             buffer, 
+                             2 * CMD_SIZE, 
+                             0 );
+  /*Attempt to send command several times*/
+  for ( i = 0 ; i < CMD_ATTEMPTS ; i++)
+    {
+      /*Send command*/
+      send_command ( camera_desc, frame );
+      /*Delay before checking*/
+      at91_wait_open ( & wait_desc );
+      /*Check if a frame was received*/
+      status = at91_usart_get_status ( camera_desc->usart_desc );
+
+      if ( status & US_RXRDY )
+	{
+	  /*Try to get a frame from the buffer*/
+	  if ( get_frame ( buffer, & ack, 2 * CMD_SIZE ) )
+	    {
+	      /*Check if frame was an ACK*/
+	      if ( ack.command == ACK && ack.param1 == frame->command )
+		{
+		  return_val = TRUE;
+		  break;
+		}
+	    }
+	}
+    }
+  free ( buffer );
+  return return_val;
+}

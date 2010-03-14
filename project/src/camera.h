@@ -126,7 +126,11 @@
 #define FREQUENCY_60HZ 0x01
 
 /*Misc. Definitions*/
-#define CMD_SIZE 6
+#define CMD_SIZE 6       /*Size of a command frame*/
+#define SYNC_ATTEMPTS 60 /*Number of attempts for sync command*/
+#define CMD_ATTEMPTS 5 /*Number of attempts for other commands*/
+#define CLOCK 32000      /*Clock frequency*/
+#define DELAY 1000       /*time interval between transmissions*/
 
 /*Camera Descriptor Structure Definition*/
 typedef struct
@@ -157,6 +161,12 @@ void * take_picture ( CameraDesc * camera_desc,
                       char snapshot_type, 
                       char picture_type, 
                       u_int pkg_size );
-CommandFrame * get_frame ( char * buffer );
+u_int get_frame ( char * buffer, 
+		  CommandFrame * frame,
+		  u_int size, 
+		  u_int number );
+void send_command ( CameraDesc * camera_desc, CommandFrame * frame );
 
+u_int send_command_get_ack ( CameraDesc * camera_desc,
+			     CommandFrame * frame );
 #endif
