@@ -107,18 +107,20 @@ u_int init_camera ( CameraDesc * camera_desc,
  * be sent to the board.  The image is then sent in packets and the image data
  * is extracted and stored in a buffer.  That buffer is returned.
  */
-void * take_picture ( CameraDesc * camera_desc,
+char * take_picture ( CameraDesc * camera_desc,
                       char snapshot_type,
                       char picture_type,
                       u_int pkg_size )
 {
-  char * buffer, pkgsize0, pkgsize1;
-  u_int status, i;
+  char * buffer, pkgsize0, pkgsize1, * picture_buffer, num_pkg;
+  u_int status, pic_length, pkg_count = 0;
   CommandFrame set_pkg_size = { HEAD, SET_PACKAGE_SIZE, EMPTY, 
 				EMPTY, EMPTY, EMPTY };
   CommandFrame snap = { HEAD, SNAPSHOT, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame get_pic = { HEAD, GET_PICTURE, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame ack = { HEAD, ACK, EMPTY, EMPTY, EMPTY, EMPTY };
+  CommandFrame rec_ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
+  CommandFrame rec_data = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
   /*Set clock for wait function*/
   wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
   wait_desc.period = DELAY; /*time between transmissions: 1s*/
@@ -133,19 +135,102 @@ void * take_picture ( CameraDesc * camera_desc,
 
   /*Fill the frame parameters*/
   snap.param1 = snapshot_type;
-  get_pic.param1 = picture_size;
+  get_pic.param1 = picture_type;
   set_pkg_size.param1 = 0x08;
   set_pkg_size.param2 = pkgsize0;
   set_pkg_size.param3 = pkgsize1;
-  
+
+  /*Send SET_PACKAGE_SIZE to the camera and wait for an ACK*/
+  if ( send_command_get_ack ( camera_desc, & set_pkg_size ) == FALSE )
+    {
+      free ( buffer );
+      return NULL; /*Fail if no ACK was received*/
+    }
+
+  /*Send SNAPSHOT to the camera and wait for an ACK*/
+  if ( send_command_get_ack ( camera_desc, & snap ) == FALSE )
+    {
+      free ( buffer );
+      return NULL; /*Fail if no ACK was received*/
+    }
 
   /*Set up the receive buffer*/
   at91_usart_receive_frame ( camera_desc->usart_desc, 
                              buffer, 
                              3 * CMD_SIZE, 
                              0 );
-  /*Send SET_PACKAGE_SIZE to the camera and wait for an ACK*/
-  send_command_get_ack ( camera_desc, & set_pkg_size );
+  /*Send GET_PICTURE*/
+  send_command ( camera_desc, & get_pic );
+  /*Delay before next attempt*/
+  at91_wait_open ( & wait_desc );
+  status = at91_usart_get_status ( camera_desc->usart_desc );
+  
+  /*Check if something was received*/                                           
+  if ( status & US_RXRDY ) 
+    {
+      /*Try to get the frames*/
+      if ( get_frame ( buffer, & rec_ack, 3 * CMD_SIZE, 1 )
+	   && get_frame (buffer, & rec_data, 3 * CMD_SIZE, 2 ) )
+	{
+	  if ( rec_ack.command == ACK 
+	       && rec_ack.param1 == GET_PICTURE 
+	       && rec_data.command == DATA )
+	    {
+	      /*Make a new buffer */
+	      free ( buffer );
+	      buffer = malloc ( pkg_size );
+	      memset( buffer, 0, pkg_size );
+
+	      /*Make the picture buffer*/
+	      pic_length = (u_int) ( ( rec_data.param4 << 16 ) |
+				     ( rec_data.param3 << 8 ) |
+				     rec_data.param2 );
+	      picture_buffer = malloc ( pic_length );
+	      memset ( picture_buffer, 0, pic_length );
+
+	      /*Calculate number of packages to receive*/
+	      num_pkg = pic_length / ( pkg_size - 6 );
+
+	      /*Get the image data*/
+	      while ( pkg_count < num_pkg )
+		{
+		  /*Set up the receive buffer*/
+		  at91_usart_receive_frame ( camera_desc->usart_desc, 
+					     buffer, 
+					     pkg_size, 
+					     0 );	 
+		  
+		  /*calculate next package to receive*/
+		  ack.param3 = (char) ( pkg_count & 0xFF );
+		  ack.param4 = (char) ( (pkg_count & 0xFF00 ) >> 8 );
+		  
+		  /*Request the next package*/
+		  send_command ( camera_desc, & ack );
+		  at91_wait_open ( & wait_desc );
+
+		  status = at91_usart_get_status ( camera_desc->usart_desc );
+
+		  /*Did not get a frame in time*/
+		  if ( status & US_RXRDY == 0 )
+		    {
+		      free ( buffer );
+		      free ( picture_buffer );
+		      return NULL;
+		    }
+
+		  if ( extract_pic_pkg ( buffer, picture_buffer, pkg_size, 
+					 pic_length, pkg_count ) )
+		    {
+		      pkg_count++;
+		    }
+		}
+	      free( buffer );
+	      return picture_buffer;
+	    }
+	}
+    }
+  free ( buffer );
+  return NULL;
 }
 
 /*Finds a valid frame in a buffer. Looks for the number'th instance of 0xAA and
@@ -161,18 +246,18 @@ u_int get_frame ( char * buffer,
 
   for ( i = 0 ; i < size ; i++ )
     {
-      if ( buffer[i] == HEAD )/*found a frame*/
+      if ( buffer[i] == HEAD ) /*found a frame*/
 	{
 	  if ( --number == 0 )
 	    {
-	      frame->header = buffer[i];           /*fill the command struct*/
+	      frame->header = buffer[i]; /*fill the command struct*/
 	      frame->command = buffer[i+1];
 	      frame->param1 = buffer[i+2];
 	      frame->param2 = buffer[i+3];
 	      frame->param3 = buffer[i+4];
 	      frame->param4 = buffer[i+5];
 
-	      return TRUE;                         /*return success*/
+	      return TRUE; /*return success*/
 	    }
 	}
     }
@@ -233,7 +318,7 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
       if ( status & US_RXRDY )
 	{
 	  /*Try to get a frame from the buffer*/
-	  if ( get_frame ( buffer, & ack, 2 * CMD_SIZE ) )
+	  if ( get_frame ( buffer, & ack, 2 * CMD_SIZE, 1 ) )
 	    {
 	      /*Check if frame was an ACK*/
 	      if ( ack.command == ACK && ack.param1 == frame->command )
@@ -246,4 +331,46 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
     }
   free ( buffer );
   return return_val;
+}
+
+/*Extracts the picture data from the camera data package and stores it in the
+ * picture buffer according to the package number.  Returns TRUE if the checksum
+ * passes and the package number matches,and FALSE otherwise.
+ */
+u_int extract_pic_pkg ( char * buffer,
+			char * pic_buffer,
+			u_int pkg_size,
+			u_int pic_length,
+			u_int pkg_number )
+{
+  char pkg_number_low, pkg_number_high;
+  u_int data_size, checksum = 0, checksum_index, i, pic_offset;
+
+  pkg_number_low = (char) ( pkg_number & 0xFF );
+  pkg_number_high = (char) ( ( pkg_number & 0xFF00 ) >> 8 );
+
+  if ( pkg_number_low != buffer[0] || pkg_number_high != buffer[1] )
+    {
+      return FALSE;
+    }
+  data_size = (u_int) ( buffer[2] | ( buffer[3] << 8 ) );
+
+  checksum_index = data_size + 3;
+
+  for ( i = 0 ; i < checksum_index ; i++ )
+    {
+      checksum += buffer[i];
+    }
+
+  if ( (char) ( checksum & 0xFF ) != buffer[checksum_index] )
+    {
+      return FALSE;
+    }
+
+  pic_offset = pkg_number * ( pkg_size - 6 );
+  for ( i = 4 ; i < checksum_index ; i++ )
+    {
+      pic_buffer [ i - 3 + pic_offset ] = buffer[i];
+    }
+  return TRUE;
 }
