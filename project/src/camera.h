@@ -163,8 +163,9 @@ u_int init_camera ( CameraDesc * camera_desc,
                     char jpeg_res );
 char * take_picture ( CameraDesc * camera_desc, 
                       char snapshot_type, 
-                      char picture_type, 
-                      u_int pkg_size );
+                      char picture_type,
+		      u_int res_x,
+		      u_int res_y );
 u_int get_frame ( char * buffer, 
 		  CommandFrame * frame,
 		  u_int size, 
@@ -173,9 +174,5 @@ void send_command ( CameraDesc * camera_desc,
 		    CommandFrame * frame );
 u_int send_command_get_ack ( CameraDesc * camera_desc,
 			     CommandFrame * frame );
-u_int extract_pic_pkg ( char * buffer,
-			char * pic_buffer,
-			u_int pkg_size,
-			u_int pic_length,
-			u_int pkg_number );
+
 #endif

@@ -1,6 +1,10 @@
 /*COMedia C328-7640 uart camera driver This file contains the function
  * definitions for the C328-7640 uart camera
  */
+
+/*Uncomment this line to get debug messages*/
+#define DEBUG
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -56,12 +60,29 @@ u_int sync_camera ( CameraDesc * camera_desc )
       at91_wait_open ( & wait_desc );
       status = at91_usart_get_status ( camera_desc->usart_desc );
 
+#ifdef DEBUG
+      printf ( "Synchronizing attempt %d\n", i );
+#endif
+
       /*Check if something was received*/                                           
       if ( status & US_RXRDY ) 
 	{
+
+#ifdef DEBUG
+	  printf ( "Sync: Received something\n" );
+	  printf ( "%x %x %x %x %x %x\n", buffer[0], buffer[1],
+		   buffer[2], buffer[3], buffer[4], buffer[5] );
+
+	  printf ( "%x %x %x %x %x %x\n", buffer[6], buffer[7],
+		   buffer[8], buffer[9], buffer[10], buffer[11] );
+
+	  printf ( "%x %x %x %x %x %x\n", buffer[12], buffer[13],
+		   buffer[14], buffer[15], buffer[16], buffer[17] );
+#endif
+
           /*Try to get the frames*/
 	  if ( get_frame ( buffer, & rec_ack, 3 * CMD_SIZE, 1 )
-	       && get_frame (buffer, & rec_sync, 3 * CMD_SIZE, 2 ) )
+	       && get_frame ( buffer, & rec_sync, 3 * CMD_SIZE, 2 ) )
 	    {
 	      if ( rec_ack.command == ACK 
 		   && rec_ack.param1 == SYNC 
@@ -96,26 +117,31 @@ u_int init_camera ( CameraDesc * camera_desc,
   init.param3 = preview_res;
   init.param4 = jpeg_res;
 
+#ifdef DEBUG
+  printf ( "Init: sending command\n" );
+#endif
+
   /*Send INITIAL to the camera and listen for ACK*/
   return send_command_get_ack ( camera_desc, & init );
  
 }
 
 /*Gets a picture from the camera Sends all the commands required to get a
- * picture from the camera.  Sends SET_PACKAGE_SIZE, then SNAPSHOT, then
- * GET_PICTURE.  Camera sends DATA command containing the size of the image to
- * be sent to the board.  The image is then sent in packets and the image data
- * is extracted and stored in a buffer.  That buffer is returned.
+ * picture from the camera.  Sends SNAPSHOT, then GET_PICTURE.  Camera sends
+ * DATA command containing the size of the image to be sent to the board.  The
+ * image is then sent as a single transmission and stored in a buffer.  That
+ * buffer is returned.  The buffer contains the frames for the ACK and DATA
+ * packets received after sending GET_PICTURE before the image data.
  */
 char * take_picture ( CameraDesc * camera_desc,
                       char snapshot_type,
                       char picture_type,
-                      u_int pkg_size )
+		      u_int res_x,
+		      u_int res_y )
 {
-  char * buffer, pkgsize0, pkgsize1, * picture_buffer, num_pkg;
-  u_int status, pic_length, pkg_count = 0;
-  CommandFrame set_pkg_size = { HEAD, SET_PACKAGE_SIZE, EMPTY, 
-				EMPTY, EMPTY, EMPTY };
+  char * buffer, * picture_buffer;
+  u_int status, pic_length, i;
+
   CommandFrame snap = { HEAD, SNAPSHOT, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame get_pic = { HEAD, GET_PICTURE, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame ack = { HEAD, ACK, EMPTY, EMPTY, EMPTY, EMPTY };
@@ -129,23 +155,9 @@ char * take_picture ( CameraDesc * camera_desc,
   buffer = malloc ( 3 * CMD_SIZE ); /*oversized buffer in case of offset*/
   memset ( buffer, 0, 3 * CMD_SIZE );
 
-  /*Calculate values for set_package_size parameters*/
-  pkgsize0 = (char) ( pkg_size & 0x00FF );
-  pkgsize1 = (char) ( ( pkg_size & 0xFF00 >> 8) );
-
   /*Fill the frame parameters*/
   snap.param1 = snapshot_type;
   get_pic.param1 = picture_type;
-  set_pkg_size.param1 = 0x08;
-  set_pkg_size.param2 = pkgsize0;
-  set_pkg_size.param3 = pkgsize1;
-
-  /*Send SET_PACKAGE_SIZE to the camera and wait for an ACK*/
-  if ( send_command_get_ack ( camera_desc, & set_pkg_size ) == FALSE )
-    {
-      free ( buffer );
-      return NULL; /*Fail if no ACK was received*/
-    }
 
   /*Send SNAPSHOT to the camera and wait for an ACK*/
   if ( send_command_get_ack ( camera_desc, & snap ) == FALSE )
@@ -154,82 +166,64 @@ char * take_picture ( CameraDesc * camera_desc,
       return NULL; /*Fail if no ACK was received*/
     }
 
+  /*Free the command buffer, we won't be using it anymore*/
+  free ( buffer );
+
+  /*Make the picture buffer*/
+  pic_length = res_x * res_y;
+  picture_buffer = malloc ( pic_length + 3 * CMD_SIZE );
+  memset ( picture_buffer, 0, pic_length + 3 * CMD_SIZE );
+
   /*Set up the receive buffer*/
   at91_usart_receive_frame ( camera_desc->usart_desc, 
-                             buffer, 
-                             3 * CMD_SIZE, 
+                             picture_buffer, 
+                             pic_length + 3 * CMD_SIZE, 
                              0 );
   /*Send GET_PICTURE*/
   send_command ( camera_desc, & get_pic );
-  /*Delay before next attempt*/
-  at91_wait_open ( & wait_desc );
+
+  /*Delay while we wait for the image to transmit*/
+  for ( i = 0 ; i < 45 ; i++ )/*wait 45 times, wait is 1 second*/
+    at91_wait_open ( & wait_desc );
+
   status = at91_usart_get_status ( camera_desc->usart_desc );
-  
+
   /*Check if something was received*/                                           
   if ( status & US_RXRDY ) 
     {
+
+#ifdef DEBUG
+	  printf ( "Get Picture: Received something\n" );
+	  printf ( "%x %x %x %x %x %x\n", picture_buffer[0], 
+		   picture_buffer[1], picture_buffer[2], 
+		   picture_buffer[3], picture_buffer[4], 
+		   picture_buffer[5] );
+
+	  printf ( "%x %x %x %x %x %x\n", picture_buffer[6], 
+		   picture_buffer[7], picture_buffer[8], 
+		   picture_buffer[9], picture_buffer[10], 
+		   picture_buffer[11] );
+
+	  printf ( "%x %x %x %x %x %x\n", picture_buffer[12], 
+		   picture_buffer[13], picture_buffer[14], 
+		   picture_buffer[15], picture_buffer[16], 
+		   picture_buffer[17] );
+#endif
+
       /*Try to get the frames*/
-      if ( get_frame ( buffer, & rec_ack, 3 * CMD_SIZE, 1 )
-	   && get_frame (buffer, & rec_data, 3 * CMD_SIZE, 2 ) )
+      if ( get_frame ( picture_buffer, & rec_ack, 3 * CMD_SIZE, 1 )
+	   && get_frame ( picture_buffer, & rec_data, 3 * CMD_SIZE, 2 ) )
 	{
 	  if ( rec_ack.command == ACK 
 	       && rec_ack.param1 == GET_PICTURE 
-	       && rec_data.command == DATA )
+	       && rec_sync.command == DATA )
 	    {
-	      /*Make a new buffer */
-	      free ( buffer );
-	      buffer = malloc ( pkg_size );
-	      memset( buffer, 0, pkg_size );
-
-	      /*Make the picture buffer*/
-	      pic_length = (u_int) ( ( rec_data.param4 << 16 ) |
-				     ( rec_data.param3 << 8 ) |
-				     rec_data.param2 );
-	      picture_buffer = malloc ( pic_length );
-	      memset ( picture_buffer, 0, pic_length );
-
-	      /*Calculate number of packages to receive*/
-	      num_pkg = pic_length / ( pkg_size - 6 );
-
-	      /*Get the image data*/
-	      while ( pkg_count < num_pkg )
-		{
-		  /*Set up the receive buffer*/
-		  at91_usart_receive_frame ( camera_desc->usart_desc, 
-					     buffer, 
-					     pkg_size, 
-					     0 );	 
-		  
-		  /*calculate next package to receive*/
-		  ack.param3 = (char) ( pkg_count & 0xFF );
-		  ack.param4 = (char) ( (pkg_count & 0xFF00 ) >> 8 );
-		  
-		  /*Request the next package*/
-		  send_command ( camera_desc, & ack );
-		  at91_wait_open ( & wait_desc );
-
-		  status = at91_usart_get_status ( camera_desc->usart_desc );
-
-		  /*Did not get a frame in time*/
-		  if ( status & US_RXRDY == 0 )
-		    {
-		      free ( buffer );
-		      free ( picture_buffer );
-		      return NULL;
-		    }
-
-		  if ( extract_pic_pkg ( buffer, picture_buffer, pkg_size, 
-					 pic_length, pkg_count ) )
-		    {
-		      pkg_count++;
-		    }
-		}
-	      free( buffer );
+	      /*Return the picture buffer*/
 	      return picture_buffer;
 	    }
 	}
     }
-  free ( buffer );
+  free ( picture_buffer );
   return NULL;
 }
 
@@ -281,15 +275,15 @@ void send_command ( CameraDesc * camera_desc, CommandFrame * frame )
 }
 
 /*Many of the commands sent to the camera simply wait for the camera to
- * acknowledge that they were received before proceeding.  This function tries
- * sending these commands several times and checking for ACK to be received.
- * Returns TRUE or FALSE based on success.
+ * acknowledge that they were received before proceeding.  This function sends a
+ * command then waits a fixed period before checking if an ACK was
+ * returned. Returns TRUE or FALSE based on success.
  */
 u_int send_command_get_ack ( CameraDesc * camera_desc, 
 			     CommandFrame * frame )
 {
   char * buffer;
-  u_int status, i, return_val = FALSE;
+  u_int status, return_val = FALSE;
   CommandFrame ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
 
   /*Set clock for wait function*/
@@ -305,27 +299,32 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
                              buffer, 
                              2 * CMD_SIZE, 
                              0 );
-  /*Attempt to send command several times*/
-  for ( i = 0 ; i < CMD_ATTEMPTS ; i++)
+  /*Send command*/
+  send_command ( camera_desc, frame );
+  /*Delay before checking*/
+  at91_wait_open ( & wait_desc );
+  /*Check if a frame was received*/
+  status = at91_usart_get_status ( camera_desc->usart_desc );
+  
+  if ( status & US_RXRDY )
     {
-      /*Send command*/
-      send_command ( camera_desc, frame );
-      /*Delay before checking*/
-      at91_wait_open ( & wait_desc );
-      /*Check if a frame was received*/
-      status = at91_usart_get_status ( camera_desc->usart_desc );
 
-      if ( status & US_RXRDY )
+#ifdef DEBUG
+	  printf ( "Send Command: Received something\n" );
+	  printf ( "%x %x %x %x %x %x\n", buffer[0], buffer[1],
+		   buffer[2], buffer[3], buffer[4], buffer[5] );
+
+	  printf ( "%x %x %x %x %x %x\n", buffer[6], buffer[7],
+		   buffer[8], buffer[9], buffer[10], buffer[11] );
+#endif
+
+      /*Try to get a frame from the buffer*/
+      if ( get_frame ( buffer, & ack, 2 * CMD_SIZE, 1 ) )
 	{
-	  /*Try to get a frame from the buffer*/
-	  if ( get_frame ( buffer, & ack, 2 * CMD_SIZE, 1 ) )
+	  /*Check if frame was an ACK*/
+	  if ( ack.command == ACK && ack.param1 == frame->command )
 	    {
-	      /*Check if frame was an ACK*/
-	      if ( ack.command == ACK && ack.param1 == frame->command )
-		{
-		  return_val = TRUE;
-		  break;
-		}
+	      return_val = TRUE;
 	    }
 	}
     }
@@ -333,44 +332,3 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
   return return_val;
 }
 
-/*Extracts the picture data from the camera data package and stores it in the
- * picture buffer according to the package number.  Returns TRUE if the checksum
- * passes and the package number matches,and FALSE otherwise.
- */
-u_int extract_pic_pkg ( char * buffer,
-			char * pic_buffer,
-			u_int pkg_size,
-			u_int pic_length,
-			u_int pkg_number )
-{
-  char pkg_number_low, pkg_number_high;
-  u_int data_size, checksum = 0, checksum_index, i, pic_offset;
-
-  pkg_number_low = (char) ( pkg_number & 0xFF );
-  pkg_number_high = (char) ( ( pkg_number & 0xFF00 ) >> 8 );
-
-  if ( pkg_number_low != buffer[0] || pkg_number_high != buffer[1] )
-    {
-      return FALSE;
-    }
-  data_size = (u_int) ( buffer[2] | ( buffer[3] << 8 ) );
-
-  checksum_index = data_size + 3;
-
-  for ( i = 0 ; i < checksum_index ; i++ )
-    {
-      checksum += buffer[i];
-    }
-
-  if ( (char) ( checksum & 0xFF ) != buffer[checksum_index] )
-    {
-      return FALSE;
-    }
-
-  pic_offset = pkg_number * ( pkg_size - 6 );
-  for ( i = 4 ; i < checksum_index ; i++ )
-    {
-      pic_buffer [ i - 3 + pic_offset ] = buffer[i];
-    }
-  return TRUE;
-}
