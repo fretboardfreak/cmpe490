@@ -128,19 +128,25 @@
 /*Misc. Definitions*/
 #define CMD_SIZE 6       /*Size of a command frame*/
 #define SYNC_ATTEMPTS 60 /*Number of attempts for sync command*/
-#define CMD_ATTEMPTS 5 /*Number of attempts for other commands*/
 #define CLOCK 32000      /*Clock frequency*/
-#define DELAY 1000000    /*time interval between transmissions*/
+#define DELAY 250000    /*time interval between transmissions*/
+#define REFILL 2000     /*Fix for overflowing receive frame counter*/
 
 /*Baudrate dividers for camera descriptors*/
-#define BAUDS38400 (32000000 / (16 * 38400))
-#define BAUDS14400 (32000000 / (16 * 14400))
+#define BAUDS115200 (32000000 / (16 * 115200))
+#define BAUDS57600  (32000000 / (16 * 57600 ))
+#define BAUDS38400  (32000000 / (16 * 38400 ))
+#define BAUDS14400  (32000000 / (16 * 14400 ))
 
 /*Camera Descriptor Structure Definition*/
 typedef struct
 {
   const UsartDesc * usart_desc; /*USART descriptor*/
+  u_int       camera;
   u_int       baud_rate;
+  u_int       x_res;
+  u_int       y_res;
+  u_int       pixel_size;
   
 } CameraDesc;
 
@@ -163,9 +169,7 @@ u_int init_camera ( CameraDesc * camera_desc,
                     char jpeg_res );
 char * take_picture ( CameraDesc * camera_desc, 
                       char snapshot_type, 
-                      char picture_type,
-		      u_int res_x,
-		      u_int res_y );
+                      char picture_type );
 u_int get_frame ( char * buffer, 
 		  CommandFrame * frame,
 		  u_int size, 

@@ -8,15 +8,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "user/image.h"
 #include "user/camera.h"
 #include "parts/m55800/lib_m55800.h"
 #include "drivers/capture/capture.h"
 #include "drivers/wait/wait.h"
 #include "parts/m55800/eb55.h"
 
-extern void wake_up_handler (void) ;
+//extern void wake_up_handler (void) ;
 
-WaitDesc wait_desc = { &TC0_DESC, 0, 0, WAIT_DELAY, wake_up_handler } ;
+//WaitDesc wait_desc = { &TC0_DESC, 0, 0, WAIT_DELAY, wake_up_handler } ;
 
 /* Synchronize the camera for use Opens the usart, then goes through
  * the SYNC->, <-ACK SYNC, ACK-> procedure with the camera Returns
@@ -31,12 +32,12 @@ u_int sync_camera ( CameraDesc * camera_desc )
   CommandFrame rec_ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame rec_sync = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
   /*Set clock for wait function*/
-  wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
-  wait_desc.period = DELAY; /*time between transmissions: 1s*/
+  //wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
+  //wait_desc.period = DELAY; /*time between transmissions: 1s*/
 
   /*Create the buffer*/
-  buffer = malloc ( 3 * CMD_SIZE ); /*oversized buffer in case of offset*/
-  memset ( buffer, 0, 3 * CMD_SIZE );
+  buffer = malloc ( 2 * CMD_SIZE ); /*oversized buffer in case of offset*/
+  memset ( buffer, 0, 2 * CMD_SIZE );
 
   /*Open the usart*/
   at91_usart_open ( camera_desc->usart_desc, 
@@ -46,7 +47,7 @@ u_int sync_camera ( CameraDesc * camera_desc )
   /*Set up the receive buffer*/
   at91_usart_receive_frame ( camera_desc->usart_desc, 
                              buffer, 
-                             3 * CMD_SIZE, 
+                             2 * CMD_SIZE, 
                              0 );
 
   /*Send the sync command*/
@@ -57,7 +58,7 @@ u_int sync_camera ( CameraDesc * camera_desc )
       /*Send SYNC*/
       send_command ( camera_desc, & sync );
       /*Delay before next attempt*/
-      at91_wait_open ( & wait_desc );
+      //at91_wait_open ( & wait_desc );
       status = at91_usart_get_status ( camera_desc->usart_desc );
 
 #ifdef DEBUG
@@ -65,7 +66,7 @@ u_int sync_camera ( CameraDesc * camera_desc )
 #endif
 
       /*Check if something was received*/                                           
-      if ( status & US_RXRDY ) 
+      if ( status & ( US_ENDRX | US_TIMEOUT ) ) 
 	{
 
 #ifdef DEBUG
@@ -81,8 +82,8 @@ u_int sync_camera ( CameraDesc * camera_desc )
 #endif
 
           /*Try to get the frames*/
-	  if ( get_frame ( buffer, & rec_ack, 3 * CMD_SIZE, 1 )
-	       && get_frame ( buffer, & rec_sync, 3 * CMD_SIZE, 2 ) )
+	  if ( get_frame ( buffer, & rec_ack, 2 * CMD_SIZE, 1 )
+	       && get_frame ( buffer, & rec_sync, 2 * CMD_SIZE, 2 ) )
 	    {
 	      if ( rec_ack.command == ACK 
 		   && rec_ack.param1 == SYNC 
@@ -135,9 +136,7 @@ u_int init_camera ( CameraDesc * camera_desc,
  */
 char * take_picture ( CameraDesc * camera_desc,
                       char snapshot_type,
-                      char picture_type,
-		      u_int res_x,
-		      u_int res_y )
+                      char picture_type )
 {
   char * buffer, * picture_buffer;
   u_int status, pic_length, i;
@@ -147,9 +146,6 @@ char * take_picture ( CameraDesc * camera_desc,
   CommandFrame ack = { HEAD, ACK, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame rec_ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame rec_data = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
-  /*Set clock for wait function*/
-  wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
-  wait_desc.period = DELAY; /*time between transmissions: 1s*/
 
   /*Create the buffer*/
   buffer = malloc ( 3 * CMD_SIZE ); /*oversized buffer in case of offset*/
@@ -170,27 +166,30 @@ char * take_picture ( CameraDesc * camera_desc,
   free ( buffer );
 
   /*Make the picture buffer*/
-  pic_length = res_x * res_y;
-  picture_buffer = malloc ( pic_length + 3 * CMD_SIZE );
+  pic_length = camera_desc->x_res * camera_desc->y_res 
+             * camera_desc->pixel_size;
+  picture_buffer = MEMORY;
   memset ( picture_buffer, 0, pic_length + 3 * CMD_SIZE );
 
   /*Set up the receive buffer*/
   at91_usart_receive_frame ( camera_desc->usart_desc, 
                              picture_buffer, 
                              pic_length + 3 * CMD_SIZE, 
-                             0 );
+                             20 );
   /*Send GET_PICTURE*/
   send_command ( camera_desc, & get_pic );
 
-  /*Delay while we wait for the image to transmit*/
-  for ( i = 0 ; i < 45 ; i++ )/*wait 45 times, wait is 1 second*/
-    at91_wait_open ( & wait_desc );
-
-  status = at91_usart_get_status ( camera_desc->usart_desc );
-
-  /*Check if something was received*/                                           
-  if ( status & US_RXRDY ) 
+  while ( 1 )
     {
+      status = at91_usart_get_status ( camera_desc->usart_desc );
+
+      /*This is a hack to get around the 16-bit receive counter*/
+      if ( camera_desc->usart_desc->usart_base->US_RCR < REFILL )
+	camera_desc->usart_desc->usart_base->US_RCR = pic_length;
+
+      /*Check if something was received*/                                           
+      if ( status & ( US_ENDRX | US_TIMEOUT ) ) 
+	{
 
 #ifdef DEBUG
 	  printf ( "Get Picture: Received something\n" );
@@ -210,20 +209,20 @@ char * take_picture ( CameraDesc * camera_desc,
 		   picture_buffer[17] );
 #endif
 
-      /*Try to get the frames*/
-      if ( get_frame ( picture_buffer, & rec_ack, 3 * CMD_SIZE, 1 )
-	   && get_frame ( picture_buffer, & rec_data, 3 * CMD_SIZE, 2 ) )
-	{
-	  if ( rec_ack.command == ACK 
-	       && rec_ack.param1 == GET_PICTURE 
-	       && rec_sync.command == DATA )
+	  /*Try to get the frames*/
+	  if ( get_frame ( picture_buffer, & rec_ack, 3 * CMD_SIZE, 1 )
+	       && get_frame ( picture_buffer, & rec_data, 3 * CMD_SIZE, 2 ) )
 	    {
-	      /*Return the picture buffer*/
-	      return picture_buffer;
+	      if ( rec_ack.command == ACK 
+		   && rec_ack.param1 == GET_PICTURE 
+		   && rec_sync.command == DATA )
+		{
+		  /*Return the picture buffer*/
+		  return picture_buffer;
+		}
 	    }
 	}
     }
-  free ( picture_buffer );
   return NULL;
 }
 
@@ -286,10 +285,6 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
   u_int status, return_val = FALSE;
   CommandFrame ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
 
-  /*Set clock for wait function*/
-  wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
-  wait_desc.period = DELAY; /*time between transmissions: 1s*/
-
   /*Create the buffer*/
   buffer = malloc ( 2 * CMD_SIZE ); /*oversized buffer in case of offset*/
   memset ( buffer, 0, 2 * CMD_SIZE );
@@ -298,16 +293,17 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
   at91_usart_receive_frame ( camera_desc->usart_desc, 
                              buffer, 
                              2 * CMD_SIZE, 
-                             0 );
+                             20 );
   /*Send command*/
   send_command ( camera_desc, frame );
-  /*Delay before checking*/
-  at91_wait_open ( & wait_desc );
+
   /*Check if a frame was received*/
-  status = at91_usart_get_status ( camera_desc->usart_desc );
-  
-  if ( status & US_RXRDY )
+  while ( 1 )
     {
+      status = at91_usart_get_status ( camera_desc->usart_desc );
+      
+      if ( status & ( US_ENDRX | US_TIMEOUT ) )
+	{
 
 #ifdef DEBUG
 	  printf ( "Send Command: Received something\n" );
@@ -318,13 +314,14 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
 		   buffer[8], buffer[9], buffer[10], buffer[11] );
 #endif
 
-      /*Try to get a frame from the buffer*/
-      if ( get_frame ( buffer, & ack, 2 * CMD_SIZE, 1 ) )
-	{
-	  /*Check if frame was an ACK*/
-	  if ( ack.command == ACK && ack.param1 == frame->command )
+	  /*Try to get a frame from the buffer*/
+	  if ( get_frame ( buffer, & ack, 2 * CMD_SIZE, 1 ) )
 	    {
-	      return_val = TRUE;
+	      /*Check if frame was an ACK*/
+	      if ( ack.command == ACK && ack.param1 == frame->command )
+		{
+		  return_val = TRUE;
+		}
 	    }
 	}
     }
