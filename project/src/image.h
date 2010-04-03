@@ -13,6 +13,8 @@
 #define Y_RES 240
 #define MEMORY 0x400000 /*address of additional ram*/
 #define DEGREES_PER_PIXEL 0.125
+#define PI 3.1415926
+#define PI2 1.5707963
 
 #define LEFT 0;
 #define RIGHT 1;
@@ -21,14 +23,14 @@
 
 /*Coordinate structure definition*/
 typedef struct {
-  u_int x;
-  u_int y;
+  int x;
+  int y;
 } Coordinate;
 
 /*Angle structure definition*/
 typedef struct {
   float angle;
-  u_int direction;
+  int direction;
 } Angle;
 
 /*Function Prototypes*/
@@ -37,6 +39,9 @@ void find_centroid ( char * picture_buffer,
 char * remove_head ( char * picture_buffer );
 Angle * find_offset ( Coordinate * centroid );
 float find_distance ( Angle * offset );
-void init_ext_ram ( );
+void init_ext_ram ( void );
+float xpow ( float x, int n );
+float sine ( float x );
+float cosine ( float x );
 float tangent ( float angle );
 #endif

@@ -3,7 +3,7 @@
  */
 
 /*Uncomment this line to get debug messages*/
-#define DEBUG
+//*#define DEBUG
 
 #include <stdlib.h>
 #include <string.h>
@@ -39,6 +39,9 @@ u_int sync_camera ( CameraDesc * camera_desc )
   buffer = malloc ( 2 * CMD_SIZE ); /*oversized buffer in case of offset*/
   memset ( buffer, 0, 2 * CMD_SIZE );
 
+  /*Set the receive multiplexer to the camera we're using*/
+  at91_pio_write (& PIOA_DESC, PA18, camera_desc->camera );
+  
   /*Open the usart*/
   at91_usart_open ( camera_desc->usart_desc, 
                     US_ASYNC_MODE, 
@@ -139,11 +142,10 @@ char * take_picture ( CameraDesc * camera_desc,
                       char picture_type )
 {
   char * buffer, * picture_buffer;
-  u_int status, pic_length, i;
+  u_int status, pic_length;
 
   CommandFrame snap = { HEAD, SNAPSHOT, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame get_pic = { HEAD, GET_PICTURE, EMPTY, EMPTY, EMPTY, EMPTY };
-  CommandFrame ack = { HEAD, ACK, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame rec_ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame rec_data = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
 
@@ -168,7 +170,7 @@ char * take_picture ( CameraDesc * camera_desc,
   /*Make the picture buffer*/
   pic_length = camera_desc->x_res * camera_desc->y_res 
              * camera_desc->pixel_size;
-  picture_buffer = MEMORY;
+  picture_buffer = (char*) MEMORY;
   memset ( picture_buffer, 0, pic_length + 3 * CMD_SIZE );
 
   /*Set up the receive buffer*/
@@ -215,7 +217,7 @@ char * take_picture ( CameraDesc * camera_desc,
 	    {
 	      if ( rec_ack.command == ACK 
 		   && rec_ack.param1 == GET_PICTURE 
-		   && rec_sync.command == DATA )
+		   && rec_data.command == DATA )
 		{
 		  /*Return the picture buffer*/
 		  return picture_buffer;

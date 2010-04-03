@@ -131,6 +131,8 @@
 #define CLOCK 32000      /*Clock frequency*/
 #define DELAY 250000    /*time interval between transmissions*/
 #define REFILL 2000     /*Fix for overflowing receive frame counter*/
+#define CAM1 0
+#define CAM2 1
 
 /*Baudrate dividers for camera descriptors*/
 #define BAUDS115200 (32000000 / (16 * 115200))
