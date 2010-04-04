@@ -1,17 +1,37 @@
 #ifndef STEPPER
 #define STEPPER
 
+#include <stdlib.h>
+#include <string.h>
+
+#include "parts/m55800/lib_m55800.h"
+#include "drivers/capture/capture.h"
+#include "drivers/wait/wait.h"
+#include "parts/m55800/eb55.h"
+
+//modes
+#define ACCELERATION 1
+#define HALFSTEP 1
+#define FULLSTEP 2
+
+#define AZI PB0
+#define ELE PB1
+
 //timing thingies
-#define SEC 1000000
-#define DIV0 50
-#define DIV1 100
+#define DIV_AZI 80
+#define DIV_ELE 50
 
 //ENABLE is active low
-#define EN0 PB0
-#define EN1 PB1
+#define EN_AZI PB0
+#define EN_ELE PB1
 
 //CW is active low
 #define CW PB2
+
+#define LEFT HIGH
+#define RIGHT LOW
+#define UP LOW
+#define DOWN HIGH
 
 //FULL is active low
 #define FULL PB3
@@ -24,8 +44,8 @@
 #define CONTROL PB5
 
 //CLOCKS
-#define CLK0 PB6
-#define CLK1 PB7
+#define CLK_AZI PB6
+#define CLK_ELE PB7
 
 //Line Values
 #define LOW PIO_CLEAR_OUT
@@ -39,33 +59,35 @@
   spinning, 1 if braked: angle = current angle of motor
 
   The elevation motor will be initialized at its lowest point. The
-  azimuth motor will be initialized at one of it's extremes.
+  azimuth motor will be initialized at its center.
 
   Motor movement will be done by passing a motorStatus struct into the
   moveStepper function.
  */
-struct motorStatus_struct {
+typedef struct motorStatus_struct {
   u_int braked;
-  int angle;
-}; typedef motorStatus_struct motorStatus
+  float angle;
+} motorStatus; 
+
+motorStatus azimuthStatus;
+motorStatus elevationStatus;
 
 //Functions
-
-//helper functions
-void delay(u_int secs);
 
 //initialize the IO pins
 void initFull();
 void initHalf();
 
 //Low level
-void step( u_int *steps, u_int *motor, u_int *clk );
+void brake( u_int motor );
+void unbrake( u_int motor );
+void setdirection( u_int motor, u_int dir );
+void step( u_int steps, u_int motor);
+u_int getVertSteps( float degrees );
+u_int getHorSteps( float degrees );
 
 //High Level, easy access to accurate movements
-void moveStepper( motorStatus azimuth, motorStatus elevation );
+void aim( motorStatus azimuth, motorStatus elevation );
 
-//High Level helper functions
-u_int getVertSteps( u_int degrees );
-u_int getHorSteps( u_int degrees );
+#endif
 
-#endif STEPPER

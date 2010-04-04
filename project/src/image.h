@@ -8,7 +8,7 @@
 #define IMAGE_H
 
 /*Macro Definitions*/
-#define THRESHOLD 248
+#define THRESHOLD 20
 #define X_RES 320
 #define Y_RES 240
 #define MEMORY 0x400000 /*address of additional ram*/
@@ -16,8 +16,8 @@
 #define PI 3.1415926
 #define PI2 1.5707963
 
-#define LEFT 0;
-#define RIGHT 1;
+#define LEFT 0
+#define RIGHT 1
 
 #define WIDTH 0.285
 
@@ -37,11 +37,4 @@ typedef struct {
 void find_centroid ( char * picture_buffer,
 		     Coordinate * centroid );
 char * remove_head ( char * picture_buffer );
-Angle * find_offset ( Coordinate * centroid );
-float find_distance ( Angle * offset );
-void init_ext_ram ( void );
-float xpow ( float x, int n );
-float sine ( float x );
-float cosine ( float x );
-float tangent ( float angle );
 #endif

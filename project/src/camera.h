@@ -127,7 +127,7 @@
 
 /*Misc. Definitions*/
 #define CMD_SIZE 6       /*Size of a command frame*/
-#define SYNC_ATTEMPTS 60 /*Number of attempts for sync command*/
+#define SYNC_ATTEMPTS 120 /*Number of attempts for sync command*/
 #define CLOCK 32000      /*Clock frequency*/
 #define DELAY 250000    /*time interval between transmissions*/
 #define REFILL 2000     /*Fix for overflowing receive frame counter*/

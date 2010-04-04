@@ -1,0 +1,23 @@
+#!gbuild
+primaryTarget=arm_standalone.tgt
+[Project]
+	-bsp at91eb55
+	-G
+	-directive_dir=link
+	-object_dir=objs
+	-Iinclude
+	-Ilib/m55800_lib16
+	-Ilib/lib_drv_16
+	-arm_uk_asm
+	-list
+	-map
+	-keepmap
+	-Mx
+	-gsize
+	-l./lib_drv_16.a
+	-l./m55800_lib16.a
+
+default.con
+lib\m55800_lib16\m55800_optm_none_lib16.gpj		[Library]
+lib\lib_drv_16\lib_drv_16_optm_none.gpj		[Library]
+alpl_ram.gpj		[Program]

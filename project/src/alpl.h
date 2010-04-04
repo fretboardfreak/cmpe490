@@ -9,13 +9,21 @@
 #include "drivers/wait/wait.h"
 #include "parts/m55800/eb55.h"
 
-
-#define SEC 1000000
+#include "image.h"
 
 extern void wake_up_handler (void) ;
 
 WaitDesc WAIT_DESC = { &TC0_DESC, 0, 0, WAIT_DELAY, wake_up_handler } ;
 
+#define SEC 1000000
+
 void delay( float *secs );
+void init_ext_ram ( void );
+float xpow ( float x, int n );
+float sine ( float x );
+float cosine ( float x );
+float tangent ( float angle );
+Angle * find_offset ( Coordinate * centroid );
+float find_distance ( Angle * offset );
 
 #endif

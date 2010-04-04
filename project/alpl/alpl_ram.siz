@@ -1,0 +1,8 @@
+alpl_ram         .text        20320
+alpl_ram         .syscall         8
+alpl_ram         .interfunc       4
+alpl_ram         .fixaddr        32
+alpl_ram         .fixtype         8
+alpl_ram         .rodata        668
+alpl_ram         .secinfo        24
+alpl_ram         .data          172

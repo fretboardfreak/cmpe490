@@ -1,0 +1,352 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;.section ".reset","ax" 
+;.reset
+#line 18
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+#define AIC_PRIOR                            0x07    
+#line 19
+
+#line 19
+#define AIC_SRCTYPE                          0x60    
+#line 19
+#define AIC_SRCTYPE_INT_LEVEL_SENSITIVE      0x00    
+#line 19
+#define AIC_SRCTYPE_INT_EDGE_TRIGGERED       0x20    
+#line 19
+#define AIC_SRCTYPE_EXT_LOW_LEVEL            0x00    
+#line 19
+#define AIC_SRCTYPE_EXT_NEGATIVE_EDGE        0x20    
+#line 19
+#define AIC_SRCTYPE_EXT_HIGH_LEVEL           0x40    
+#line 19
+#define AIC_SRCTYPE_EXT_POSITIVE_EDGE        0x60    
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+#define AIC_IRQID                    0x1F            
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+#define AIC_NFIQ                     0x01            
+#line 19
+#define AIC_NIRQ                     0x02            
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+#define AIC_BASE                     0xFFFFF000
+#line 19
+
+#line 19
+	END
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+#define ARM_MODE_USER                0x10
+#line 19
+#define ARM_MODE_FIQ                 0x11
+#line 19
+#define ARM_MODE_IRQ                 0x12
+#line 19
+#define ARM_MODE_SVC                 0x13
+#line 19
+#define ARM_MODE_ABORT               0x17
+#line 19
+#define ARM_MODE_UNDEF               0x1B
+#line 19
+#define ARM_MODE_SYS                 0x1F
+#line 19
+
+#line 19
+#define I_BIT                        0x80
+#line 19
+#define F_BIT                        0x40
+#line 19
+#define T_BIT                        0x20
+#line 19
+
+#line 19
+            END
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+
+#line 19
+            END
+#line 19
+
+#line 20
+
+
+
+
+
+
+
+
+
+
+            EXPORT      irq_end
+irq_end
+#line 32
+   
+#line 32
+
+#line 32
+            #if 1;  "" == ""
+#line 32
+            ldmia       sp!, { r1-r3, r12, r14}
+#line 32
+            #else
+#line 32
+            ldmia       sp!, { r1-r3, , r12, r14}
+#line 32
+            #endif
+#line 32
+
+#line 32
+
+#line 32
+            mrs         r0, CPSR
+#line 32
+            bic         r0, r0, ARM_MODE_SYS
+#line 32
+            orr         r0, r0, I_BIT | ARM_MODE_IRQ
+#line 32
+            msr         CPSR_c, r0
+#line 32
+
+#line 32
+
+#line 32
+            ldr         r0, =AIC_BASE
+#line 32
+            str         r0, [r0, 0x130]
+#line 32
+
+#line 32
+
+#line 32
+            ldmia       sp!, {r0, r14}
+#line 32
+            msr         SPSR_cxsf, r14
+#line 32
+
+#line 32
+
+#line 32
+            ldmia       sp!, {pc}^
+#line 32
+
+#line 32
+
+
+            END
+

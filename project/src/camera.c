@@ -3,13 +3,14 @@
  */
 
 /*Uncomment this line to get debug messages*/
-//*#define DEBUG
+#define DEBUG
 
 #include <stdlib.h>
 #include <string.h>
 
-#include "user/image.h"
-#include "user/camera.h"
+#include "image.h"
+#include "camera.h"
+
 #include "parts/m55800/lib_m55800.h"
 #include "drivers/capture/capture.h"
 #include "drivers/wait/wait.h"
@@ -31,6 +32,7 @@ u_int sync_camera ( CameraDesc * camera_desc )
   CommandFrame ack  = { HEAD, ACK , SYNC , EMPTY, EMPTY, EMPTY };
   CommandFrame rec_ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame rec_sync = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
+  float aDelay = 0.1f;
   /*Set clock for wait function*/
   //wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
   //wait_desc.period = DELAY; /*time between transmissions: 1s*/
@@ -62,10 +64,12 @@ u_int sync_camera ( CameraDesc * camera_desc )
       send_command ( camera_desc, & sync );
       /*Delay before next attempt*/
       //at91_wait_open ( & wait_desc );
+      delay( &aDelay );
       status = at91_usart_get_status ( camera_desc->usart_desc );
 
 #ifdef DEBUG
-      printf ( "Synchronizing attempt %d\n", i );
+      //printf ( "Synchronizing attempt %d\n", i );
+      printf("");
 #endif
 
       /*Check if something was received*/                                           
@@ -73,7 +77,7 @@ u_int sync_camera ( CameraDesc * camera_desc )
 	{
 
 #ifdef DEBUG
-	  printf ( "Sync: Received something\n" );
+	  printf ( "Sync: Received something on request %d\n", i );
 	  printf ( "%x %x %x %x %x %x\n", buffer[0], buffer[1],
 		   buffer[2], buffer[3], buffer[4], buffer[5] );
 
@@ -323,6 +327,7 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
 	      if ( ack.command == ACK && ack.param1 == frame->command )
 		{
 		  return_val = TRUE;
+                  break;
 		}
 	    }
 	}

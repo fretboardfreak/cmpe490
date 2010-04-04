@@ -2,6 +2,8 @@
 
 #include "periph/timer_counter/lib_tc.h"
 
+u_int REG[3] = {COCK, 0, SERVO_PERIOD};
+
 void servoInit(void){
 	u_int mode = TC_CLKS_MCK32    |
 		TC_EEVT_XC0               |
@@ -13,26 +15,27 @@ void servoInit(void){
 		
 	//initialize/turn on servo
 	at91_tc_open ( & TC1_DESC, mode, TRUE, FALSE );
-	at91_tc_write ( & TC1_DESC, reg );	
+	at91_tc_write ( & TC1_DESC, REG );	
 	at91_tc_trig_cmd ( & TC1_DESC, TC_TRIG_CHANNEL );
 
 }
 
 void fire( void ){
-	u_int reg[3] = {COCK, 0, SERVO_PERIOD};
+
 	float aDelay = 5.0f;
 
-	reg[0] = FIRE;
+	REG[0] = FIRE;
         printf("firing\n");
-	at91_tc_write ( & TC1_DESC, reg );
+
+	at91_tc_write ( & TC1_DESC, REG );
         printf("");
 	delay( &aDelay );
         printf("");
 
 	//cock
-	reg[0] = COCK;
+	REG[0] = COCK;
         printf("cocking\n");
-	at91_tc_write ( & TC1_DESC, reg );
+	at91_tc_write ( & TC1_DESC, REG );
         printf("");
 	delay( &aDelay );
         printf("");

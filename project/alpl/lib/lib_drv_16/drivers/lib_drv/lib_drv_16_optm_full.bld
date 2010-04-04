@@ -1,0 +1,54 @@
+#!build
+default:
+	library
+	:arm_option=thumb_code
+	:coverage=false
+	:auto_mvc=false
+	:arm_cputype=arm7tm
+	:debuglevel=none
+	:profilelevel=none
+	:optimizestrategy=space
+	:outputname=ghs/optm_full/lib_drv_16.a
+	:object_dir=ghs/optm_full
+	:sourcedirs=../..
+	:assembler.args=-armuk
+drivers/analog/analog_timer.c
+	C
+drivers/analog/analog_adc_irq.c
+	C
+drivers/analog/analog_dac.c
+	C
+drivers/analog/analog_adc.c
+	C
+drivers/capture/capture.c
+	C
+drivers/chrono/chrono.c
+	C
+drivers/com/com_baud.c
+	C
+drivers/com/com.c
+	C
+drivers/com/com_tools.c
+	C
+drivers/lib_i2c/lib_i2c.c
+	C
+drivers/serial_periph_1/serial_periph_1.c
+	C
+drivers/terminal/terminal.c
+	C
+drivers/time_rtc/time_rtc_tools.c
+	C
+drivers/time_rtc/time_rtc_irq.c
+	C
+drivers/time_rtc/time_rtc.c
+	C
+drivers/wait/wait.c
+	C
+drivers/flash/flash_atxx_write.c
+	C
+drivers/flash/flash_at49_data.c
+	C
+drivers/flash/lib_flash_at29.c
+	C
+drivers/flash/lib_flash_at49.c
+	C

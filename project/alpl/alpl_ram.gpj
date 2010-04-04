@@ -1,0 +1,19 @@
+#!gbuild
+[Program]
+	-DSEMIHOSTING
+	-DRAM
+src/cmpe490/wait_irq.arm
+src/user/main.c
+src/user/alpl.c
+src/user/servo.c
+src/user/stepper.c
+src/user/camera.c
+src/user/image.c
+src/user/alpl.h
+src/user/servo.h
+src/user/stepper.h
+src/user/camera.h
+src/user/image.h
+
+link/ram.ld
+
