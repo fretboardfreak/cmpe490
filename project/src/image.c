@@ -13,24 +13,24 @@
 void find_centroid ( char * picture_buffer,
 		     Coordinate * centroid )
 {
-  u_int i, j, x_sum = 0, r_val, g_val, b_val,y_sum = 0, count = 0, tmp, tmp2, thresh=THRESHOLD;
+  unsigned int i, j, x_sum = 0, r_val, g_val, b_val,y_sum = 0, count = 0, tmp, tmp2, thresh=THRESHOLD;
   
-  for ( i = 0 ; i < X_RES ; i += 2 )
+  for ( i = 0 ; i < Y_RES ; i++ )
     {
-      for ( j = 0 ; j < Y_RES ; j += 2 )
+      for ( j = 0 ; j < X_RES * 2 ; j += 2 )
 	{
-          tmp = ( picture_buffer[j] & 0xF8 );
+          tmp = ( picture_buffer[i * Y_RES + j] & 0xF8 );
 	  r_val = tmp >> 3;
-          tmp = ( picture_buffer[j] & 0x3 );
-          tmp2 = ( picture_buffer[j+1] & 0xE0 ); 
+          tmp = ( picture_buffer[i * Y_RES + j] & 0x3 );
+          tmp2 = ( picture_buffer[i * Y_RES + j + 1] & 0xE0 ); 
 	  g_val = tmp << 3 |
 	    tmp2 >> 5;
-	  b_val = picture_buffer[j+1] & 0x1F;
+	  b_val = picture_buffer[i * Y_RES + j + 1] & 0x1F;
 
 	  if ( r_val + g_val + b_val >= thresh )
 	    {
-	      x_sum += i;
-	      y_sum += j;
+	      x_sum += j/2;
+	      y_sum += i;
 	      count++;
 	    }
 	}
