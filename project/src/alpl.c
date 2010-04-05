@@ -32,32 +32,31 @@ void delay( float *secs ){
  * centre of the image to the centroid point.
  */
 
-Angle * find_offset ( Coordinate * centroid )
+void find_offset ( Coordinate * centroid, float *offset )
 {
-  u_int x = centroid->x;
-  Angle * offset = malloc ( sizeof ( Angle ) );
-
-  if ( x <= X_RES / 2 )
-    {
-      offset->direction = LEFT;
-      offset->angle = ( X_RES / 2 - x ) * DEGREES_PER_PIXEL;
-    }
-  else
-    {
-      offset->direction = RIGHT;
-      offset->angle = ( x - X_RES / 2 ) * DEGREES_PER_PIXEL;
-    }
-  return offset;
+  *offset = ( X_RES / 2 - centroid->x ) * DEGREES_PER_PIXEL;
 }
 /*This function simply initializes the external ram we have interfaced so that
  * it can be used to store the large image arrays being processed
  */
-void init_ext_ram ( void ) 
+int init_ext_ram ( void ) 
 {
   u_int *ebi_csr2 = 0xffe00000 | 0x08;
   u_int ebi_config = 0x004020a6;
-  //more wait states: u_int ebi_config = 0x004020ae;
+  //more wait states 0x004020ae;
+  //u_int ebi_config = 0x004020ae;
+  u_int *memory = 0x400000, *i, x=0xaa;
   *ebi_csr2 = ebi_config;
+
+  for(i=memory; i<0x400100; i++){
+    *i = x;
+  }
+  for(i=memory; i<0x400100; i++){
+    if ( *i != x ){
+      return 0;
+    }
+  }
+  return 1;
 }
 
 /*Zach's Ultra-Awesome-Nuclear-Powered-Pseudo-Math-Library
@@ -113,7 +112,7 @@ float tangent ( float x )
  * centered, uses the angle to calculate the distance to the target so the shot
  * elevation may be determined.
  */
-float find_distance ( Angle * offset )
+float find_distance ( float * offset )
 {
-  return WIDTH * tangent ( 90.0 - offset->angle );
+  return WIDTH * tangent ( 90.0 - abs(*offset) );
 }

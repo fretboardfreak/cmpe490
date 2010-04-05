@@ -179,8 +179,8 @@ void aim( motorStatus azimuth, motorStatus elevation ){
    */
 	int azi_delta, ele_delta, horSteps, vertSteps;
 
-	azi_delta = azimuthStatus.angle + azimuth.angle;
-	ele_delta = elevationStatus.angle + elevation.angle;
+	azi_delta = azimuth.angle - azimuthStatus.angle;
+	ele_delta = elevation.angle - elevationStatus.angle;
 	
 	printf("azi = %d, ele = %d\n", azi_delta, ele_delta);
 	

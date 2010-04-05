@@ -8,7 +8,7 @@
 #define IMAGE_H
 
 /*Macro Definitions*/
-#define THRESHOLD 20
+#define THRESHOLD 93
 #define X_RES 320
 #define Y_RES 240
 #define MEMORY 0x400000 /*address of additional ram*/

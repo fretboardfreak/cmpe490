@@ -288,7 +288,7 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
 			     CommandFrame * frame )
 {
   char * buffer;
-  u_int status, return_val = FALSE;
+  u_int status, return_val = FALSE, i;
   CommandFrame ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
 
   /*Create the buffer*/
@@ -303,8 +303,9 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
   /*Send command*/
   send_command ( camera_desc, frame );
 
+  for(i=0; i<CMD_ATTEMPTS; i++){
   /*Check if a frame was received*/
-  while ( 1 )
+    while ( 1 )
     {
       status = at91_usart_get_status ( camera_desc->usart_desc );
       
@@ -330,8 +331,12 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
                   break;
 		}
 	    }
+          break;
 	}
     }
+    if(return_val == TRUE)
+      break;
+  }
   free ( buffer );
   return return_val;
 }

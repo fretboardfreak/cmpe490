@@ -18,12 +18,12 @@ WaitDesc WAIT_DESC = { &TC0_DESC, 0, 0, WAIT_DELAY, wake_up_handler } ;
 #define SEC 1000000
 
 void delay( float *secs );
-void init_ext_ram ( void );
+int init_ext_ram ( void );
 float xpow ( float x, int n );
 float sine ( float x );
 float cosine ( float x );
 float tangent ( float angle );
-Angle * find_offset ( Coordinate * centroid );
-float find_distance ( Angle * offset );
+void find_offset ( Coordinate * centroid, float * offset );
+float find_distance ( float * offset );
 
 #endif

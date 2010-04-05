@@ -95,31 +95,6 @@
  * #endif
  */
 
-#ifdef ALPL
-
-char* getPic( CameraDesc *camera ){
-  char *picture;
-  printf("Synching camera\n");
-  if ( sync_camera ( &camera ) == FALSE ){
-    printf("Synchronization failed.\n");
-    return 0;
-  }
-  printf("Initializing camera\n");
-  if (init_camera( &camera, 
-                   COLOR_TYPE_16_BIT_COLOR,
-                   JPEG_RES_320x240,
-                   JPEG_RES_80x64 ) == FALSE ){
-    printf("Initialization of camera failed\n");
-    return 0;
-  }
-  printf("taking picture\n");
-  picture = take_picture( & camera, 
-                          SNAPSHOT_TYPE_UNCOMPRESSED,
-                          PICTURE_TYPE_SNAPSHOT );
-  return picture
-}
-#endif
-
 int main( void ){
   /*
    * #ifdef MOTOR_TEST
@@ -156,11 +131,8 @@ int main( void ){
    * #ifdef CAMERA_TEST
    *         CameraDesc camera = {&USART2_DESC, CAM1, BAUDS115200, 320, 240, 2};
    *         char *picture, *pic2;
-   *         Coordinate coord1;
-   *         
-   *         
-   *         initHalf();      
-   *         servoInit();
+   *         Coordinate *coord1;
+   * 
    *         init_ext_ram();
    *        
    *         printf("Synching camera\n");
@@ -183,30 +155,32 @@ int main( void ){
    *         if ( picture == NULL ){
    *           printf("take pucture failed.\n");
    *         }
-   *         printf("picture is at %x\n", picture);
+   *         printf("picture is at %x\n", picture);             
    * 
    *         pic2 = remove_head ( picture );
-   *         find_centroid( pic2, &coord1 );
-   *         printf("Coordinates Are: x=%d, y=%d\n", coord1.x, coord1.y);
+   *         find_centroid( pic2, coord1 );
+   *         printf("Coordinates Are: x=%d, y=%d\n", coord1->x, coord1->y);
    *         getchar();
-   *         
-   *         return 0;
+   * 
    * #endif
    */
-
 
 #ifdef ALPL
   CameraDesc cam1 = {&USART2_DESC, CAM1, BAUDS115200, 320, 240, 2};
   CameraDesc cam2 = {&USART2_DESC, CAM2, BAUDS115200, 320, 240, 2};
   char *pic, *rgbData;
+  float offset1, offset2;
   Coordinate coord1, coord2;
   motorStatus azimuth, elevation;
 
   //enable external hardware
   initHalf();    
   servoInit();   
+  if( !init_ext_ram()){
+    printf("failed to init ext ram\n");
+    return 0;
+  }
   init_ext_ram();
-
 
   while(1){
     //Look for button 1 press to start. Need an interrupt and stuff for
@@ -219,28 +193,74 @@ int main( void ){
     azimuth.angle = 0.0f;
     elevation.braked = 1;
     elevation.angle = 0.0f;
+    aim( azimuth, elevation );
 
     //take picture 1 from cam1
-    pic = getPic( &cam1 );
-    
-    //get the x & y coordinates of the LED from pic
-    if ( pic == NULL ){
-      printf("take pucture failed.\n");
+    printf("Synching camera\n");
+    if ( sync_camera ( &cam1 ) == FALSE ){
+      printf("Synchronization failed.\n");
+      return 0;
     }
-    printf("picture is at %x\n", pic);
+    printf("Initializing camera\n");
+    if (init_camera( &cam1, 
+                     COLOR_TYPE_16_BIT_COLOR,
+                     JPEG_RES_320x240,
+                     JPEG_RES_80x64 ) == FALSE ){
+      printf("Initialization of camera failed\n");
+      return 0;
+    }
+    printf("taking picture\n");
+    pic = take_picture( & cam1, 
+                            SNAPSHOT_TYPE_UNCOMPRESSED,
+                            PICTURE_TYPE_SNAPSHOT );
+    if ( pic == NULL ){
+      printf("take picture failed.\n");
+    }
+    printf("picture is at %x\n", pic);             
+
+    //get the x & y coordinates of the LED from pic
     
     rgbData = remove_head ( pic );
     find_centroid( rgbData, &coord1 );
 
-    printf("Coordinates Are: x=%d, y=%d\n", coord1.x, coord1.y);
+    printf("First Coordinates Are: x=%d, y=%d\n", coord1.x, coord1.y);
     
     //get the degrees offset from current position
-    
+    find_offset( &coord1, &offset1 );
+
     //move the azimuth motor to center the LED in cam1
-    
+    azimuth.angle = azimuthStatus.angle + offset1;
+    aim( azimuth, elevation );
+
     //take picture 2 from cam2
+    printf("Synching camera\n");
+    if ( sync_camera ( &cam2 ) == FALSE ){
+      printf("Synchronization failed.\n");
+      return 0;
+    }
+    printf("Initializing camera\n");
+    if (init_camera( &cam2, 
+                     COLOR_TYPE_16_BIT_COLOR,
+                     JPEG_RES_320x240,
+                     JPEG_RES_80x64 ) == FALSE ){
+      printf("Initialization of camera failed\n");
+      return 0;
+    }
+    printf("taking picture\n");
+    pic = take_picture( & cam2, 
+                            SNAPSHOT_TYPE_UNCOMPRESSED,
+                            PICTURE_TYPE_SNAPSHOT );
+    if ( pic == NULL ){
+      printf("take pucture failed.\n");
+    }
+    printf("picture is at %x\n", pic);             
     
     //get the x & y coordinates of the LED from pic2
+    
+    rgbData = remove_head ( pic );
+    find_centroid( rgbData, &coord2 );
+
+    printf("Second Coordinates Are: x=%d, y=%d\n", coord2.x, coord2.y);
     
     //get (and print) the distance to the LED
     
