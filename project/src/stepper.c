@@ -1,15 +1,16 @@
 #include "stepper.h"
 
 u_int MODE;
+//u_int DIV_ELE = DIVELE;
 
-u_int getVertSteps( float degrees ){
-  float tmp = abs( degrees / (float) (VDEGPSTEP * MODE));
-  return (u_int) tmp;
+int getVertSteps( float degrees ){
+  float tmp = degrees / (float) (VDEGPSTEP * MODE);
+  return (int) tmp;
 }
 
-u_int getHorSteps( float degrees ){
-  float tmp = abs(degrees / (float) (HDEGPSTEP * MODE));
-  return (u_int) tmp;
+int getHorSteps( float degrees ){
+  float tmp = degrees / (float) (HDEGPSTEP * MODE);
+  return (int) tmp;
 }
 
 void initHalf(){
@@ -20,11 +21,19 @@ void initHalf(){
                  PIO_OUTPUT );
 
   //initialize stepper lines
-  at91_pio_write( &PIOB_DESC,
+  /*at91_pio_write( &PIOB_DESC,
                   CW | RESET | CONTROL,
                   HIGH);
   at91_pio_write( &PIOB_DESC,
                   FULL| EN_AZI | EN_ELE | CLK_AZI | CLK_ELE,
+                  LOW);
+  */
+
+  at91_pio_write( &PIOB_DESC,
+                  CW | RESET | FULL,
+                  HIGH);
+  at91_pio_write( &PIOB_DESC,
+                  CONTROL | EN_AZI | EN_ELE | CLK_AZI | CLK_ELE,
                   LOW);
 
   at91_pio_write( &PIOB_DESC, RESET, LOW );
@@ -35,9 +44,9 @@ void initHalf(){
 
   MODE = HALFSTEP;
   azimuthStatus.braked = 0;
-  azimuthStatus.angle = 0.0f;
+  azimuthStatus.steps = 0;
   elevationStatus.braked = 0;
-  elevationStatus.angle = -28.2f;
+  elevationStatus.steps = -20;
 }
 
 void initFull(){
@@ -61,11 +70,11 @@ void initFull(){
   printf("");
   at91_pio_write( &PIOB_DESC, RESET, HIGH );
 
-  MODE = FULLSTEP;
+  MODE = HALFSTEP;
   azimuthStatus.braked = 0;
-  azimuthStatus.angle = 0.0f;
+  azimuthStatus.steps = 0;
   elevationStatus.braked = 0;
-  elevationStatus.angle = -28.2f;
+  elevationStatus.steps = -5;
 }
 
 void brake( u_int motor ){
@@ -117,6 +126,7 @@ void step( u_int steps, u_int motor){
 		delay(&period);
 		at91_pio_write( &PIOB_DESC, clk, LOW );
 		delay(&period);
+                printf("step %d", i+1);
 	}
 }
 
@@ -125,16 +135,16 @@ void accelStep( u_int steps, u_int motor ){
      and 10% at the end of the move will be
      accelleration/decelleration.
    */
-  u_int accelSteps = steps/10;
+  u_int accelSteps = steps/5;
   u_int startDecel = steps - accelSteps;
 
   u_int i, clk;
   float divisor, period, accelerator, accelDelta;
 
-  if ( steps <= 15 ){
+  /*if ( steps < 10 ){
     step( steps, motor );
     return;
-  }
+    }*/
 
   if (motor == AZI){
     divisor = (float)DIV_AZI;
@@ -177,45 +187,38 @@ void aim( motorStatus azimuth, motorStatus elevation ){
     - if braked is false then set enable line to low
     - repeat for elevation
    */
-	int azi_delta, ele_delta, horSteps, vertSteps;
+  int azi_delta, ele_delta;
+  
+  azi_delta = azimuth.steps - azimuthStatus.steps;
+  ele_delta = elevation.steps - elevationStatus.steps;
+  
+  printf("azi = %d, ele = %d\n", azi_delta, ele_delta);
+  
+  if ( azi_delta < 0 )
+    setDirection( AZI, LEFT );
+  else
+    setDirection( AZI, RIGHT );
+  
+  brake( AZI );
 
-	azi_delta = azimuth.angle - azimuthStatus.angle;
-	ele_delta = elevation.angle - elevationStatus.angle;
-	
-	printf("azi = %d, ele = %d\n", azi_delta, ele_delta);
-	
-	if ( azi_delta < 0 )
-		setDirection( AZI, LEFT );
-	else
-		setDirection( AZI, RIGHT );
-	
-	brake( AZI );
-	horSteps = getHorSteps( azi_delta );
-#ifdef ACCELERATION
-        accelStep( horSteps, AZI );
-#endif
-#ifndef ACCELERATION
-	step( horSteps, AZI );
-#endif
-	if ( ele_delta < 0 )
-		setDirection( ELE, DOWN );
-	else
-		setDirection( ELE, UP );
-	
-	brake( ELE );
-	vertSteps = getVertSteps( ele_delta );
-#ifdef ACCELERATION
-        accelStep( vertSteps, ELE );
-#endif
-#ifndef ACCELERATION
-	step( vertSteps, ELE );	
-#endif
-	if ( azimuth.braked == 0 )
-		unbrake( AZI );
-	if ( elevation.braked == 0)
-		unbrake( ELE );
+  accelStep( abs(azi_delta), AZI );
 
-        //update the current status of the motors
-        azimuthStatus = azimuth;
-        elevationStatus = elevation;
+  if ( ele_delta < 0 )
+    setDirection( ELE, DOWN );
+  else
+    setDirection( ELE, UP );
+  
+  brake( ELE );
+
+  //accelStep( abs(ele_delta), ELE );
+  step( abs(ele_delta), ELE );
+
+  if ( azimuth.braked == 0 )
+    unbrake( AZI );
+  if ( elevation.braked == 0)
+    unbrake( ELE );
+  
+  //update the current status of the motors
+  azimuthStatus = azimuth;
+  elevationStatus = elevation;
 }

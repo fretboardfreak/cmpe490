@@ -42,7 +42,7 @@ u_int sync_camera ( CameraDesc * camera_desc )
   memset ( buffer, 0, 2 * CMD_SIZE );
 
   /*Set the receive multiplexer to the camera we're using*/
-  at91_pio_write (& PIOA_DESC, PA18, camera_desc->camera );
+  at91_pio_write (& PIOB_DESC, PB18, camera_desc->camera );
   
   /*Open the usart*/
   at91_usart_open ( camera_desc->usart_desc, 
@@ -77,7 +77,7 @@ u_int sync_camera ( CameraDesc * camera_desc )
 	{
 
 #ifdef DEBUG
-	  printf ( "Sync: Received something on request %d\n", i );
+	  /*printf ( "Sync: Received something on request %d\n", i );
 	  printf ( "%x %x %x %x %x %x\n", buffer[0], buffer[1],
 		   buffer[2], buffer[3], buffer[4], buffer[5] );
 
@@ -85,8 +85,16 @@ u_int sync_camera ( CameraDesc * camera_desc )
 		   buffer[8], buffer[9], buffer[10], buffer[11] );
 
 	  printf ( "%x %x %x %x %x %x\n", buffer[12], buffer[13],
-		   buffer[14], buffer[15], buffer[16], buffer[17] );
+          buffer[14], buffer[15], buffer[16], buffer[17] );*/
+          printf("");
+          printf("");
+          printf("");
 #endif
+          if ( buffer[0] == 0 && buffer[1] == 0 && buffer[2] == 0 &&
+               buffer[3] == 0 && buffer[4] == 0 && buffer[5] == 0 ){
+            free( buffer );
+            return FALSE;
+          }
 
           /*Try to get the frames*/
 	  if ( get_frame ( buffer, & rec_ack, 2 * CMD_SIZE, 1 )
@@ -174,8 +182,13 @@ char * take_picture ( CameraDesc * camera_desc,
   /*Make the picture buffer*/
   pic_length = camera_desc->x_res * camera_desc->y_res 
              * camera_desc->pixel_size;
-  picture_buffer = (char*) MEMORY;
-  memset ( picture_buffer, 0, pic_length + 3 * CMD_SIZE );
+
+  //picture_buffer = (char*) MEMORY;
+  picture_buffer = calloc( pic_length + 3 * CMD_SIZE, 1 );
+  if ( picture_buffer == NULL ){
+    printf("Could not allocate the picture buffer\n");
+    return NULL;
+  }
 
   /*Set up the receive buffer*/
   at91_usart_receive_frame ( camera_desc->usart_desc, 
@@ -190,15 +203,15 @@ char * take_picture ( CameraDesc * camera_desc,
       status = at91_usart_get_status ( camera_desc->usart_desc );
 
       /*This is a hack to get around the 16-bit receive counter*/
-      if ( camera_desc->usart_desc->usart_base->US_RCR < REFILL )
-	camera_desc->usart_desc->usart_base->US_RCR = pic_length;
+      //if ( camera_desc->usart_desc->usart_base->US_RCR < REFILL )
+      //camera_desc->usart_desc->usart_base->US_RCR = pic_length;
 
       /*Check if something was received*/                                           
       if ( status & ( US_ENDRX | US_TIMEOUT ) ) 
 	{
 
 #ifdef DEBUG
-	  printf ( "Get Picture: Received something\n" );
+	  /*printf ( "Get Picture: Received something\n" );
 	  printf ( "%x %x %x %x %x %x\n", picture_buffer[0], 
 		   picture_buffer[1], picture_buffer[2], 
 		   picture_buffer[3], picture_buffer[4], 
@@ -212,7 +225,11 @@ char * take_picture ( CameraDesc * camera_desc,
 	  printf ( "%x %x %x %x %x %x\n", picture_buffer[12], 
 		   picture_buffer[13], picture_buffer[14], 
 		   picture_buffer[15], picture_buffer[16], 
-		   picture_buffer[17] );
+		   picture_buffer[17] );*/
+          printf("");
+          printf("");
+          printf("");
+          printf("");
 #endif
 
 	  /*Try to get the frames*/
@@ -288,7 +305,7 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
 			     CommandFrame * frame )
 {
   char * buffer;
-  u_int status, return_val = FALSE, i;
+  u_int status, i;
   CommandFrame ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
 
   /*Create the buffer*/
@@ -300,11 +317,11 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
                              buffer, 
                              2 * CMD_SIZE, 
                              20 );
-  /*Send command*/
-  send_command ( camera_desc, frame );
 
+  /*Send command*/
   for(i=0; i<CMD_ATTEMPTS; i++){
   /*Check if a frame was received*/
+    send_command ( camera_desc, frame );
     while ( 1 )
     {
       status = at91_usart_get_status ( camera_desc->usart_desc );
@@ -327,17 +344,17 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
 	      /*Check if frame was an ACK*/
 	      if ( ack.command == ACK && ack.param1 == frame->command )
 		{
-		  return_val = TRUE;
-                  break;
+                  free( buffer );
+                  return TRUE;
 		}
 	    }
+          at91_usart_receive_frame ( camera_desc->usart_desc, buffer, 
+                                     2 * CMD_SIZE, 20 );
           break;
 	}
     }
-    if(return_val == TRUE)
-      break;
   }
   free ( buffer );
-  return return_val;
+  return FALSE;
 }
 

@@ -19,13 +19,13 @@ void find_centroid ( char * picture_buffer,
     {
       for ( j = 0 ; j < X_RES * 2 ; j += 2 )
 	{
-          tmp = ( picture_buffer[i * Y_RES + j] & 0xF8 );
+          tmp = ( picture_buffer[i * X_RES * 2 + j] & 0xF8 );
 	  r_val = tmp >> 3;
-          tmp = ( picture_buffer[i * Y_RES + j] & 0x3 );
-          tmp2 = ( picture_buffer[i * Y_RES + j + 1] & 0xE0 ); 
+          tmp = ( picture_buffer[i * X_RES * 2 + j] & 0x3 );
+          tmp2 = ( picture_buffer[i * X_RES * 2 + j + 1] & 0xE0 ); 
 	  g_val = tmp << 3 |
 	    tmp2 >> 5;
-	  b_val = picture_buffer[i * Y_RES + j + 1] & 0x1F;
+	  b_val = picture_buffer[i * X_RES * 2 + j + 1] & 0x1F;
 
 	  if ( r_val + g_val + b_val >= thresh )
 	    {

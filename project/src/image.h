@@ -8,11 +8,14 @@
 #define IMAGE_H
 
 /*Macro Definitions*/
-#define THRESHOLD 93
-#define X_RES 320
-#define Y_RES 240
+#define THRESHOLD 70
+//#define X_RES 320
+//#define Y_RES 240
+#define X_RES 80
+#define Y_RES 60
 #define MEMORY 0x400000 /*address of additional ram*/
-#define DEGREES_PER_PIXEL 0.125
+//#define DEGREES_PER_PIXEL 0.125
+#define DEGREES_PER_PIXEL 0.5
 #define PI 3.1415926
 #define PI2 1.5707963
 

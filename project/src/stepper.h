@@ -19,7 +19,9 @@
 
 //timing thingies
 #define DIV_AZI 80
-#define DIV_ELE 50
+#define DIV_ELE 4
+//#define DIVELE 2
+
 
 //ENABLE is active low
 #define EN_AZI PB0
@@ -66,7 +68,7 @@
  */
 typedef struct motorStatus_struct {
   u_int braked;
-  float angle;
+  int steps;
 } motorStatus; 
 
 motorStatus azimuthStatus;
@@ -83,8 +85,9 @@ void brake( u_int motor );
 void unbrake( u_int motor );
 void setdirection( u_int motor, u_int dir );
 void step( u_int steps, u_int motor);
-u_int getVertSteps( float degrees );
-u_int getHorSteps( float degrees );
+void accelStep( u_int steps, u_int motor );
+int getVertSteps( float degrees );
+int getHorSteps( float degrees );
 
 //High Level, easy access to accurate movements
 void aim( motorStatus azimuth, motorStatus elevation );

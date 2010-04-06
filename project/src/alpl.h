@@ -19,11 +19,11 @@ WaitDesc WAIT_DESC = { &TC0_DESC, 0, 0, WAIT_DELAY, wake_up_handler } ;
 
 void delay( float *secs );
 int init_ext_ram ( void );
-float xpow ( float x, int n );
-float sine ( float x );
-float cosine ( float x );
-float tangent ( float angle );
+void xpow ( float *x, int n, float *ans );
+void sine ( float *x, float *ans );
+void cosine ( float *x, float *ans );
+void tangent ( float *angle, float *ans );
 void find_offset ( Coordinate * centroid, float * offset );
-float find_distance ( float * offset );
-
+void find_distance ( float * offset, float * distance );
+void initCamMux( void );
 #endif

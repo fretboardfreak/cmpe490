@@ -34,7 +34,9 @@ void delay( float *secs ){
 
 void find_offset ( Coordinate * centroid, float *offset )
 {
-  *offset = ( X_RES / 2 - centroid->x ) * DEGREES_PER_PIXEL;
+  float tmp = ( centroid->x - X_RES / 2 );
+  printf("find_offset: number of pixels from center = %f\n", tmp);
+  *offset = tmp * DEGREES_PER_PIXEL;
 }
 /*This function simply initializes the external ram we have interfaced so that
  * it can be used to store the large image arrays being processed
@@ -42,9 +44,9 @@ void find_offset ( Coordinate * centroid, float *offset )
 int init_ext_ram ( void ) 
 {
   u_int *ebi_csr2 = 0xffe00000 | 0x08;
-  u_int ebi_config = 0x004020a6;
+  //u_int ebi_config = 0x004020a6;
   //more wait states 0x004020ae;
-  //u_int ebi_config = 0x004020ae;
+  u_int ebi_config = 0x004020ae;
   u_int *memory = 0x400000, *i, x=0xaa;
   *ebi_csr2 = ebi_config;
 
@@ -67,52 +69,75 @@ int init_ext_ram ( void )
  * tangent returns the tangent of x degrees, returns 0 in cases where
  * tan would normally be infinite.
  */
-float xpow ( float x, int n )
+void xpow ( float *x, int n, float *ans )
 {
-  float product = x;
+  float product = *x;
   if ( n == 0 )
-    return (float) 1;
+    *ans = 1.0f;
   while( n > 1 )
     {
-      product *= x;
+      product *= *x;
       n--;
     }
-  return product;
+  *ans = (float) product;
 }
 
-float sine ( float x )
+void sine ( float *x, float *ans )
 {
-  float x_rad = x * PI / 180;
+  float x_rad = *x * PI / 180.0f;
   float pivot = x_rad - PI2;
-  float sin_rad = 1.0f - xpow ( pivot, 2 ) / 2 + xpow ( pivot, 4 ) / 24 
-                  - xpow ( pivot, 6 ) / 720 + xpow ( pivot, 8 ) / 40320;
-  return sin_rad; 
+  float pivotP2, pivotP4, pivotP6, pivotP8;
+  xpow( &pivot, 2, &pivotP2 );
+  xpow( &pivot, 4, &pivotP4 );
+  xpow( &pivot, 6, &pivotP6 );
+  xpow( &pivot, 8, &pivotP8 );
+  //*ans = 1.0f - xpow ( pivot, 2 ) / 2 + xpow ( pivot, 4 ) / 24 
+  //       - xpow ( pivot, 6 ) / 720 + xpow ( pivot, 8 ) / 40320;
+  *ans = 1.0f - pivotP2 / 2.0f + pivotP4 / 24.0f - pivotP6 / 720.0f 
+         + pivotP8 / 40320.0f;
 }
 
-float cosine ( float x )
+void cosine ( float *x, float *ans )
 {
-  float x_rad = x * PI / 180;
+  float x_rad = *x * PI / 180.0f;
   float pivot = x_rad - PI2;
-  float cos_rad = 0 - pivot + xpow ( pivot, 3 ) / 6 - xpow ( pivot, 5 ) / 120
-                  + xpow ( pivot, 7 ) / 5040 - xpow ( pivot, 9 ) / 362880;
-  return cos_rad;
+  float pivotP3, pivotP5, pivotP7, pivotP9;
+  xpow( &pivot, 3, &pivotP3 );
+  xpow( &pivot, 5, &pivotP5 );
+  xpow( &pivot, 7, &pivotP7 );
+  xpow( &pivot, 9, &pivotP9 );
+  //*ans = 0 - pivot + xpow ( pivot, 3 ) / 6 - xpow ( pivot, 5 ) / 120
+  //       + xpow ( pivot, 7 ) / 5040 - xpow ( pivot, 9 ) / 362880;
+  *ans = 0.0f - pivot + pivotP3 / 6.0f - pivotP5 / 120.0f + pivotP7 / 5040.0f 
+         - pivotP9 / 362880.0f;
 }
 
-float tangent ( float x )
+void tangent ( float *x, float *ans )
 {
-  float sin = sine ( x );
-  float cos = cosine ( x );
+  float sin, cos;
+  sine ( x, &sin );
+  cosine ( x, &cos );
   if ( cos == 0.0f )
-    return 0;
+    *ans = 0;
   else
-    return sin / cos;
+    *ans = sin / cos;
 }
 
 /*This function takes an offset angle and, assuming that the turret has been
  * centered, uses the angle to calculate the distance to the target so the shot
  * elevation may be determined.
  */
-float find_distance ( float * offset )
+void find_distance ( float * offset, float * distance )
 {
-  return WIDTH * tangent ( 90.0 - abs(*offset) );
+  float tan, tmp;
+  if( *offset < 0 )
+    *offset = 0 - *offset;
+  tmp = 90.0 - *offset;
+  printf("find offset tmp = %f\n", tmp );
+  tangent( &tmp, &tan );
+  *distance = WIDTH * tan ;
+}
+
+void initCamMux( void ){
+  at91_pio_open( &PIOB_DESC, PB18, PIO_OUTPUT );
 }
