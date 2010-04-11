@@ -1,163 +1,147 @@
 #include "stepper.h"
 
-u_int MODE;
-//u_int DIV_ELE = DIVELE;
+//extern void wake_up_handler (void) ;
+//extern WaitDesc alpl_wait_desc;
 
-int getVertSteps( float degrees ){
-  float tmp = degrees / (float) (VDEGPSTEP * MODE);
+
+u_int MODE;
+
+int getVertSteps( float *degrees ){
+  float tmp = *degrees / (float) (VDEGPSTEP * MODE);
   return (int) tmp;
 }
 
-int getHorSteps( float degrees ){
-  float tmp = degrees / (float) (HDEGPSTEP * MODE);
+int getHorSteps( float *degrees ){
+  float tmp = *degrees / (float) (HDEGPSTEP * MODE);
   return (int) tmp;
 }
 
 void initHalf(){
   //setup piob for stepper motor output
-  float halfSec = 0.5f;
   at91_pio_open( &PIOB_DESC,
                  PB0 | PB1 | PB2 | PB3 | PB4 | PB5 | PB6 | PB7,
                  PIO_OUTPUT );
 
   //initialize stepper lines
-  /*at91_pio_write( &PIOB_DESC,
-                  CW | RESET | CONTROL,
-                  HIGH);
   at91_pio_write( &PIOB_DESC,
-                  FULL| EN_AZI | EN_ELE | CLK_AZI | CLK_ELE,
-                  LOW);
-  */
-
-  at91_pio_write( &PIOB_DESC,
-                  CW | RESET | FULL,
+                  CW | STEPPER_RESET | FULL,
                   HIGH);
   at91_pio_write( &PIOB_DESC,
                   CONTROL | EN_AZI | EN_ELE | CLK_AZI | CLK_ELE,
                   LOW);
 
-  at91_pio_write( &PIOB_DESC, RESET, LOW );
+  at91_pio_write( &PIOB_DESC, STEPPER_RESET, LOW );
 
-  delay(&halfSec);
+  wait( SEC/2 );
 
-  at91_pio_write( &PIOB_DESC, RESET, HIGH );
+  at91_pio_write( &PIOB_DESC, STEPPER_RESET, HIGH );
 
   MODE = HALFSTEP;
   azimuthStatus.braked = 0;
   azimuthStatus.steps = 0;
   elevationStatus.braked = 0;
-  elevationStatus.steps = -20;
+  elevationStatus.steps = INITIAL_POSITION;
+  return;
 }
 
 void initFull(){
   //setup piob for stepper motor output
-  float halfSec = 0.5f;
   at91_pio_open( &PIOB_DESC,
                  PB0 | PB1 | PB2 | PB3 | PB4 | PB5 | PB6 | PB7,
                  PIO_OUTPUT );
 
   //initialize stepper lines
   at91_pio_write( &PIOB_DESC,
-                  CW | RESET | FULL,
+                  CW | STEPPER_RESET | CONTROL,
                   HIGH);
   at91_pio_write( &PIOB_DESC,
-                  CONTROL | EN_AZI | EN_ELE | CLK_AZI | CLK_ELE,
+                  FULL| EN_AZI | EN_ELE | CLK_AZI | CLK_ELE,
                   LOW);
 
-  at91_pio_write( &PIOB_DESC, RESET, LOW );
+  at91_pio_write( &PIOB_DESC, STEPPER_RESET, LOW );
   
-  delay(&halfSec);
-  printf("");
-  at91_pio_write( &PIOB_DESC, RESET, HIGH );
+  wait( SEC/2 );
+
+  at91_pio_write( &PIOB_DESC, STEPPER_RESET, HIGH );
 
   MODE = HALFSTEP;
   azimuthStatus.braked = 0;
   azimuthStatus.steps = 0;
   elevationStatus.braked = 0;
-  elevationStatus.steps = -5;
+  elevationStatus.steps = -10;
 }
 
 void brake( u_int motor ){
-	motorStatus motorToBrake;
-	if( motor == AZI )
-		motorToBrake = azimuthStatus;
-	else
-		motorToBrake = elevationStatus;
-
 	at91_pio_write( &PIOB_DESC, motor, HIGH );
-	motorToBrake.braked = 1;
+	if( motor == AZI )
+          azimuthStatus.braked = 1;
+	else
+          elevationStatus.braked = 1;;
+        return;
 }
 
 void unbrake( u_int motor ){
-	motorStatus motorToUnbrake;
-	if( motor == AZI )
-		motorToUnbrake = azimuthStatus;
-	else
-		motorToUnbrake = elevationStatus;
-
 	at91_pio_write( &PIOB_DESC, motor, LOW );
-	motorToUnbrake.braked = 0;	
+	if( motor == AZI )
+          azimuthStatus.braked = 0;
+	else
+          elevationStatus.braked = 0;
+        return;
 }
 
 void setDirection( u_int motor, u_int dir ) {
 	at91_pio_write( &PIOB_DESC, CW, dir );
+        return;
 }
 
 void step( u_int steps, u_int motor){ 
   /* toggle the clock line a number af times. order for this to do
      anything the motor needs to be in 'braked' mode.
    */
-	u_int i;
-	float divisor, period;
-	u_int clk;
-	
-	if (motor == AZI){
-		divisor = (float)DIV_AZI;
-		clk = CLK_AZI;
-	}
-	else {
-		divisor = (float) DIV_ELE;
-		clk = CLK_ELE;
-	}
-	period = (float)1.0/divisor;
-	
-	for(i = 0 ; i < steps; i++){
-		at91_pio_write( &PIOB_DESC, clk, HIGH );
-		delay(&period);
-		at91_pio_write( &PIOB_DESC, clk, LOW );
-		delay(&period);
-                printf("step %d", i+1);
-	}
-}
-
-void accelStep( u_int steps, u_int motor ){
-  /* Same as step except 10% of the steps at the beginning of the move
-     and 10% at the end of the move will be
-     accelleration/decelleration.
-   */
-  u_int accelSteps = steps/5;
-  u_int startDecel = steps - accelSteps;
-
-  u_int i, clk;
-  float divisor, period, accelerator, accelDelta;
-
-  /*if ( steps < 10 ){
-    step( steps, motor );
-    return;
-    }*/
-
+  u_int i, divisor, clk, period;
+  
   if (motor == AZI){
-    divisor = (float)DIV_AZI;
+    divisor = DIV_AZI;
     clk = CLK_AZI;
   }
   else {
-    divisor = (float) DIV_ELE;
+    divisor = DIV_ELE;
     clk = CLK_ELE;
   }
-  period = (float)1.0/divisor;
+  period = SEC/divisor;
+
+  for(i = 0 ; i < steps; i++){
+    at91_pio_write( &PIOB_DESC, clk, HIGH );
+    wait( period );
+    at91_pio_write( &PIOB_DESC, clk, LOW );
+    wait( period );
+  }
+  return;
+}
+
+void accelStep( u_int steps, u_int motor ){
+  /* Same as step except accelSteps steps at the beginning of the move
+     and accelSteps at the end of the move will be
+     accelleration/decelleration.
+
+     steps/5 = 20% of the steps
+     steps/4 = 25%
+   */
+  u_int accelSteps = steps/5;
+  u_int i, clk, divisor, accelerator, accelDelta, period;
+
+  if (motor == AZI){
+    divisor = DIV_AZI;
+    clk = CLK_AZI;
+  }
+  else {
+    divisor = DIV_ELE;
+    clk = CLK_ELE;
+  }
+  period = SEC/divisor;
   accelerator = period / 2;
   accelDelta = accelerator / accelSteps;
-  
+
   for(i = 0 ; i < steps; i++){
     if ( i <= accelSteps ){ //in acceleration mode
       period = accelerator;
@@ -168,13 +152,14 @@ void accelStep( u_int steps, u_int motor ){
       accelerator = accelerator - accelDelta;
     }
     else
-      period = (float)1.0/divisor;
+      period = SEC/divisor;
+
     at91_pio_write( &PIOB_DESC, clk, HIGH );
-    delay(&period);
+    wait( period );
     at91_pio_write( &PIOB_DESC, clk, LOW );
-    delay(&period);
+    wait( period );
   }
-  
+  return;
 }
 
 void aim( motorStatus azimuth, motorStatus elevation ){
@@ -192,8 +177,6 @@ void aim( motorStatus azimuth, motorStatus elevation ){
   azi_delta = azimuth.steps - azimuthStatus.steps;
   ele_delta = elevation.steps - elevationStatus.steps;
   
-  printf("azi = %d, ele = %d\n", azi_delta, ele_delta);
-  
   if ( azi_delta < 0 )
     setDirection( AZI, LEFT );
   else
@@ -210,9 +193,9 @@ void aim( motorStatus azimuth, motorStatus elevation ){
   
   brake( ELE );
 
-  //accelStep( abs(ele_delta), ELE );
-  step( abs(ele_delta), ELE );
-
+  accelStep( abs(ele_delta), ELE );
+  //step( abs(ele_delta), ELE );
+  
   if ( azimuth.braked == 0 )
     unbrake( AZI );
   if ( elevation.braked == 0)
@@ -221,4 +204,5 @@ void aim( motorStatus azimuth, motorStatus elevation ){
   //update the current status of the motors
   azimuthStatus = azimuth;
   elevationStatus = elevation;
+  return;
 }

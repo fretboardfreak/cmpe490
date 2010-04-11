@@ -19,9 +19,6 @@
 #define PI 3.1415926
 #define PI2 1.5707963
 
-#define LEFT 0
-#define RIGHT 1
-
 #define WIDTH 0.285
 
 /*Coordinate structure definition*/

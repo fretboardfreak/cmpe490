@@ -130,7 +130,7 @@
 #define SYNC_ATTEMPTS 120 /*Number of attempts for sync command*/
 #define CMD_ATTEMPTS 5 /*Number of attempts for other commands*/
 #define CLOCK 32000      /*Clock frequency*/
-#define DELAY 250000    /*time interval between transmissions*/
+#define DELAY 7813    /*time interval between transmissions*/
 #define REFILL 2000     /*Fix for overflowing receive frame counter*/
 #define CAM1 1
 #define CAM2 0

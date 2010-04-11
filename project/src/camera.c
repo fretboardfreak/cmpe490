@@ -17,8 +17,7 @@
 #include "parts/m55800/eb55.h"
 
 //extern void wake_up_handler (void) ;
-
-//WaitDesc wait_desc = { &TC0_DESC, 0, 0, WAIT_DELAY, wake_up_handler } ;
+//extern WaitDesc alpl_wait_desc;
 
 /* Synchronize the camera for use Opens the usart, then goes through
  * the SYNC->, <-ACK SYNC, ACK-> procedure with the camera Returns
@@ -26,16 +25,14 @@
  */
 u_int sync_camera ( CameraDesc * camera_desc )
 {
-  u_int i, status, return_val = FALSE;
+  u_int i, status, return_val = FALSE, period;
   char * buffer;
   CommandFrame sync = { HEAD, SYNC, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame ack  = { HEAD, ACK , SYNC , EMPTY, EMPTY, EMPTY };
   CommandFrame rec_ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame rec_sync = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
-  float aDelay = 0.1f;
-  /*Set clock for wait function*/
-  //wait_desc.mcki_khz = CLOCK; /*clock speed: 32kHz*/
-  //wait_desc.period = DELAY; /*time between transmissions: 1s*/
+
+  period = DELAY; /*time between transmissions: 1/4s*/
 
   /*Create the buffer*/
   buffer = malloc ( 2 * CMD_SIZE ); /*oversized buffer in case of offset*/
@@ -63,13 +60,11 @@ u_int sync_camera ( CameraDesc * camera_desc )
       /*Send SYNC*/
       send_command ( camera_desc, & sync );
       /*Delay before next attempt*/
-      //at91_wait_open ( & wait_desc );
-      delay( &aDelay );
+      wait( period );
       status = at91_usart_get_status ( camera_desc->usart_desc );
 
 #ifdef DEBUG
-      //printf ( "Synchronizing attempt %d\n", i );
-      printf("");
+      wait( period );
 #endif
 
       /*Check if something was received*/                                           
@@ -77,18 +72,7 @@ u_int sync_camera ( CameraDesc * camera_desc )
 	{
 
 #ifdef DEBUG
-	  /*printf ( "Sync: Received something on request %d\n", i );
-	  printf ( "%x %x %x %x %x %x\n", buffer[0], buffer[1],
-		   buffer[2], buffer[3], buffer[4], buffer[5] );
-
-	  printf ( "%x %x %x %x %x %x\n", buffer[6], buffer[7],
-		   buffer[8], buffer[9], buffer[10], buffer[11] );
-
-	  printf ( "%x %x %x %x %x %x\n", buffer[12], buffer[13],
-          buffer[14], buffer[15], buffer[16], buffer[17] );*/
-          printf("");
-          printf("");
-          printf("");
+          wait( period );
 #endif
           if ( buffer[0] == 0 && buffer[1] == 0 && buffer[2] == 0 &&
                buffer[3] == 0 && buffer[4] == 0 && buffer[5] == 0 ){
@@ -127,6 +111,7 @@ u_int init_camera ( CameraDesc * camera_desc,
                     char jpeg_res )
 {
   CommandFrame init = { HEAD, INITIAL, EMPTY, EMPTY, EMPTY, EMPTY };
+  u_int period = DELAY; /*time between transmissions: 1/4s*/
  
   /*Fill the init parameters*/
   init.param2 = colour_type;
@@ -134,7 +119,7 @@ u_int init_camera ( CameraDesc * camera_desc,
   init.param4 = jpeg_res;
 
 #ifdef DEBUG
-  printf ( "Init: sending command\n" );
+  wait( period );
 #endif
 
   /*Send INITIAL to the camera and listen for ACK*/
@@ -154,7 +139,7 @@ char * take_picture ( CameraDesc * camera_desc,
                       char picture_type )
 {
   char * buffer, * picture_buffer;
-  u_int status, pic_length;
+  u_int status, pic_length, period = DELAY;
 
   CommandFrame snap = { HEAD, SNAPSHOT, EMPTY, EMPTY, EMPTY, EMPTY };
   CommandFrame get_pic = { HEAD, GET_PICTURE, EMPTY, EMPTY, EMPTY, EMPTY };
@@ -186,7 +171,6 @@ char * take_picture ( CameraDesc * camera_desc,
   //picture_buffer = (char*) MEMORY;
   picture_buffer = calloc( pic_length + 3 * CMD_SIZE, 1 );
   if ( picture_buffer == NULL ){
-    printf("Could not allocate the picture buffer\n");
     return NULL;
   }
 
@@ -211,25 +195,7 @@ char * take_picture ( CameraDesc * camera_desc,
 	{
 
 #ifdef DEBUG
-	  /*printf ( "Get Picture: Received something\n" );
-	  printf ( "%x %x %x %x %x %x\n", picture_buffer[0], 
-		   picture_buffer[1], picture_buffer[2], 
-		   picture_buffer[3], picture_buffer[4], 
-		   picture_buffer[5] );
-
-	  printf ( "%x %x %x %x %x %x\n", picture_buffer[6], 
-		   picture_buffer[7], picture_buffer[8], 
-		   picture_buffer[9], picture_buffer[10], 
-		   picture_buffer[11] );
-
-	  printf ( "%x %x %x %x %x %x\n", picture_buffer[12], 
-		   picture_buffer[13], picture_buffer[14], 
-		   picture_buffer[15], picture_buffer[16], 
-		   picture_buffer[17] );*/
-          printf("");
-          printf("");
-          printf("");
-          printf("");
+          wait(period);
 #endif
 
 	  /*Try to get the frames*/
@@ -305,8 +271,10 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
 			     CommandFrame * frame )
 {
   char * buffer;
-  u_int status, i;
+  u_int status, i, period;
   CommandFrame ack = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
+
+  period = DELAY;
 
   /*Create the buffer*/
   buffer = malloc ( 2 * CMD_SIZE ); /*oversized buffer in case of offset*/
@@ -330,12 +298,7 @@ u_int send_command_get_ack ( CameraDesc * camera_desc,
 	{
 
 #ifdef DEBUG
-	  printf ( "Send Command: Received something\n" );
-	  printf ( "%x %x %x %x %x %x\n", buffer[0], buffer[1],
-		   buffer[2], buffer[3], buffer[4], buffer[5] );
-
-	  printf ( "%x %x %x %x %x %x\n", buffer[6], buffer[7],
-		   buffer[8], buffer[9], buffer[10], buffer[11] );
+          wait( period );
 #endif
 
 	  /*Try to get a frame from the buffer*/

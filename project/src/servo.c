@@ -21,25 +21,15 @@ void servoInit(void){
 }
 
 void fire( void ){
+  //fire
+  REG[0] = FIRE;
+  at91_tc_write ( & TC1_DESC, REG );
+        
+  //pause
+  wait( SEC );
+  wait( SEC );
 
-	float aDelay = 5.0f;
-
-	REG[0] = FIRE;
-        printf("firing\n");
-
-	at91_tc_write ( & TC1_DESC, REG );
-        printf("");
-	delay( &aDelay );
-        printf("");
-
-	//cock
-	REG[0] = COCK;
-        printf("cocking\n");
-	at91_tc_write ( & TC1_DESC, REG );
-        printf("");
-	delay( &aDelay );
-        printf("");
-
-	//turn off servo
-	//at91_tc_close( &TC1_DESC );
+  //cock
+  REG[0] = COCK;
+  at91_tc_write ( & TC1_DESC, REG );
 }

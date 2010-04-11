@@ -14,13 +14,16 @@
 #define HALFSTEP 1
 #define FULLSTEP 2
 
+#define INITIAL_POSITION -21
+
 #define AZI PB0
 #define ELE PB1
 
 //timing thingies
-#define DIV_AZI 80
-#define DIV_ELE 4
-//#define DIVELE 2
+#define SEC 31250
+#define DIV_AZI 40
+#define DIV_ELE 20
+#define DIVELE 2
 
 
 //ENABLE is active low
@@ -39,7 +42,7 @@
 #define FULL PB3
 
 //RESET is active low
-#define RESET PB4
+#define STEPPER_RESET PB4
 
 //CONTROL should be opposite value of the FULL line for a bipolar
 // motor
@@ -86,8 +89,8 @@ void unbrake( u_int motor );
 void setdirection( u_int motor, u_int dir );
 void step( u_int steps, u_int motor);
 void accelStep( u_int steps, u_int motor );
-int getVertSteps( float degrees );
-int getHorSteps( float degrees );
+int getVertSteps( float *degrees );
+int getHorSteps( float *degrees );
 
 //High Level, easy access to accurate movements
 void aim( motorStatus azimuth, motorStatus elevation );

@@ -10,7 +10,8 @@
 #include "parts/m55800/eb55.h"
 #include "periph/timer_counter/lib_tc.h"
 
-#define FIRE 0x6cc
+#define SEC 31250
+#define FIRE 1550
 #define COCK 0x41A
 #define SERVO_PERIOD 0x4E20
 
