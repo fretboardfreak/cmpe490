@@ -1,0 +1,5 @@
+#!/bin/sh
+wget http://www.ece.ualberta.ca/~csand/files/${1}.txt
+./resize ${1}.txt ${1}big.txt
+./develop.py ${1}big.txt ${1}.jpg
+gimp ${1}.jpg

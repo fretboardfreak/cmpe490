@@ -1,0 +1,16 @@
+#!/usr/bin/python
+
+from PIL import Image
+import io
+from optparse import OptionParser
+parser = OptionParser()
+(options, args) = parser.parse_args()
+
+f = io.FileIO(args[0], 'rb')
+
+bytes = f.readall()
+
+im = Image.frombuffer('RGB',(80,60),bytes,"raw","RGB",0,1)
+
+im.save(args[1])
+
