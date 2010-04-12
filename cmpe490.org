@@ -375,3 +375,35 @@ This file is owned and maintained by Curtis Sand.  All Rights Reserved.
    - Ballistic Model Subroutine
      - Approx. 1 week
      - Group Member: Unknown
+
+* final project
+** diagrams we need to draw
+   - high level module layout
+   - buffer board layout
+   - ram pinout
+   - buffer IC/mux wiring diagram
+   - breakout board schematic
+   - FOV diagram w/trig
+   - distance trig
+   - matlab graph
+** report changes
+*** _X_ functional requirements
+    - what is it supposed to do
+    - were those met?
+    - move options/extensions to futur work.
+*** _X_ design and description of operation
+*** _X_ hardware requirements
+    - remove
+*** _X_ parts list
+*** __ datasheet
+*** _X_ schedule 
+    - remove
+*** _X_ references
+*** _X_ Quick start manual
+*** _X_ Future work
+    - motion tracking, better ballistic model, infra-red cameras/target, rtos to speed up execution.
+*** _X_ Hardware Documentation
+*** _X_ Source Code 
+    - heirarchy diagram
+    - src code index
+*** _X_ Self Evaluation
